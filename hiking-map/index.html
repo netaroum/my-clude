@@ -114,6 +114,34 @@ svg#map { display: block; width: 100%; height: auto; aspect-ratio: 850 / 900; ma
 .scene-ctl button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
 .scene-msg { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--muted); }
 .btn3d { font: inherit; font-size: 13.5px; font-weight: 700; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent); cursor: pointer; align-self: flex-start; }
+.toprow { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.progress { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.progress b { font-family: var(--font-data); font-size: 18px; color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.progress .bar { width: 110px; height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.progress .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .4s; }
+.pin .done { display: none; }
+.pin.climbed .done { display: inline; }
+.pin g.done circle { fill: var(--accent); stroke: var(--pin-stroke); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.pin g.done path { fill: none; stroke: var(--surface); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.list button.climbed::after { content: "✓"; color: var(--accent); font-weight: 700; }
+.record { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.record.done { background: var(--accent-soft); border-color: var(--accent); }
+.rec-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rec-check { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--surface); display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+.rec-memo { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.rec-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 13px; }
+.rec-btn { font: inherit; font-size: 12.5px; padding: 3px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.rec-btn.danger { border-color: var(--lv3); color: var(--lv3); }
+.rec-form { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: flex-end; }
+.rec-form label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--muted); min-width: 0; }
+.rec-form label:nth-child(2) { flex: 1 1 180px; }
+.rec-form input { font: inherit; font-size: 14px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); width: 100%; }
+.rec-save { font: inherit; font-size: 14px; font-weight: 700; padding: 6px 14px; border-radius: 8px; border: 0; background: var(--accent); color: var(--surface); cursor: pointer; }
+.rec-where { font-size: 11.5px; color: var(--muted); }
+.rec-btn:focus-visible, .rec-save:focus-visible, .rec-form input:focus-visible, .access a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.access { display: flex; flex-direction: column; gap: 4px; }
+.access p { margin: 0; font-size: 14px; }
+.access a { color: var(--accent); font-weight: 700; font-size: 13.5px; align-self: flex-start; }
 .hint { font-size: 12.5px; color: var(--muted); margin: 0; }
 
 .list { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -203,12 +231,16 @@ ul.check input:checked + span { color: var(--muted); text-decoration: line-throu
 
   <div class="grid">
     <section class="mapcard" aria-label="地図">
-      <div class="viewtabs" role="group" aria-label="表示切り替え">
-        <button type="button" id="view-map" aria-pressed="true">日本地図</button>
-        <button type="button" id="view-3d" aria-pressed="false">3D地形</button>
+      <div class="toprow">
+        <div class="viewtabs" role="group" aria-label="表示切り替え">
+          <button type="button" id="view-map" aria-pressed="true">日本地図</button>
+          <button type="button" id="view-3d" aria-pressed="false">3D地形</button>
+        </div>
+        <div class="progress" aria-label="登頂記録">登頂記録 <b><span id="rec-count">0</span> / <span id="rec-total"></span></b>山<span class="bar"><i id="rec-bar"></i></span></div>
       </div>
       <div class="chips" id="regions"><span class="label">地方</span></div>
       <div class="chips" id="levels"><span class="label">難易度</span></div>
+      <div class="chips" id="recfilter"><span class="label">記録</span></div>
       <div class="mapbox">
         <svg id="map" viewBox="0 0 850 900" role="img" aria-label="日本地図と低山の位置"></svg>
         <div id="scene" hidden>
@@ -231,7 +263,7 @@ ul.check input:checked + span { color: var(--muted); text-decoration: line-throu
 
     <section class="panel" id="panel" aria-live="polite"></section>
   </div>
-  <p class="foot">生き物・植物の情報は、その地域で一般的に注意したいものをまとめた目安です。地図の陰影は標高データから作った地形の起伏で、北西から光を当てた表現です。コースタイムは休憩を含まない往復の目安です（六甲山のみ片道縦走）。登山道の通行止め、ロープウェイの運行、火山情報、クマの出没情報は出発前に自治体や施設の公式情報で確認してください。</p>
+  <p class="foot">電車・バスの情報は目安です。本数や運行日は変わることがあるので、出発前に各交通機関の時刻表を確認してください。生き物・植物の情報は、その地域で一般的に注意したいものをまとめた目安です。地図の陰影は標高データから作った地形の起伏で、北西から光を当てた表現です。コースタイムは休憩を含まない往復の目安です（六甲山のみ片道縦走）。登山道の通行止め、ロープウェイの運行、火山情報、クマの出没情報は出発前に自治体や施設の公式情報で確認してください。</p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -303,6 +335,49 @@ const M = [
   { id:"katsuu", n:"嘉津宇岳", k:"かつうだけ", p:"沖縄県名護市", r:"kyushu", e:452, lat:26.6353, lon:127.9281, lv:1, t:1, c:"嘉津宇岳駐車場から往復", d:"やんばるの入口にある石灰岩の山。短時間で登れ、山頂から名護湾と東シナ海が広がります。", tags:["rock","habu"] },
 ];
 
+// 電車・バスでの行き方 (a: 説明, q: Googleマップで経路検索する目的地)
+const ACCESS = {
+  hakodate:  { a: "函館市電「十字街」電停から旧登山道入口まで徒歩約15分。", q: "函館山 旧登山道入口" },
+  moiwa:     { a: "地下鉄東西線「円山公園」駅からJRバスで「慈啓会前」下車、登山口まですぐ。", q: "慈啓会前 バス停 札幌" },
+  tarumae:   { a: "7合目へ行く路線バスはありません。JR苫小牧駅からタクシーか車で（道路は夏〜秋のみ通行可）。", q: "樽前山7合目ヒュッテ" },
+  izumi:     { a: "地下鉄南北線「泉中央」駅から仙台市営バスで「泉岳自然ふれあい館」下車。本数が少ないので時刻を確認。", q: "泉岳自然ふれあい館" },
+  ryozen:    { a: "JR福島駅から福島交通バスで「霊山こどもの村」下車。本数が少ないので時刻を確認。", q: "霊山こどもの村" },
+  tsukuba:   { a: "つくばエクスプレス「つくば」駅から筑波山シャトルバスで「筑波山神社入口」下車、徒歩約10分。", q: "筑波山神社入口 バス停" },
+  takao:     { a: "京王線「高尾山口」駅から登山口まで徒歩約5分。", q: "高尾山口駅" },
+  mitake:    { a: "JR青梅線「御嶽」駅から西東京バスで「ケーブル下」下車、滝本駅からケーブルカー。", q: "御岳登山鉄道 滝本駅" },
+  hiwada:    { a: "西武池袋線「高麗」駅から登山口まで徒歩約20分。", q: "高麗駅" },
+  oyama:     { a: "小田急線「伊勢原」駅から神奈中バスで終点「大山ケーブル」、ケーブルカー駅まで徒歩約15分。", q: "大山ケーブル駅" },
+  kintoki:   { a: "JR御殿場駅または小田急「箱根湯本」駅からバスで「金時神社入口」下車。", q: "金時神社入口 バス停" },
+  nokogiri:  { a: "JR内房線「浜金谷」駅から登山口まで徒歩約10分。", q: "浜金谷駅" },
+  yahiko:    { a: "JR弥彦線「弥彦」駅から彌彦神社まで徒歩約15分。", q: "彌彦神社" },
+  ishiwari:  { a: "富士急行線「富士山」駅から富士急バスで「平野」下車、石割神社の登山口まで徒歩約15分。", q: "平野 バス停 山中湖村" },
+  kinka:     { a: "JR岐阜駅・名鉄岐阜駅から岐阜バスで「岐阜公園・歴史博物館前」下車。", q: "岐阜公園" },
+  sanage:    { a: "名鉄・愛知環状鉄道「豊田市」駅から、とよたおいでんバスで「猿投神社前」下車。", q: "猿投神社" },
+  daimonji:  { a: "京都市バス「銀閣寺道」下車、銀閣寺の横の登山口まで徒歩約15分。", q: "銀閣寺" },
+  ikoma:     { a: "近鉄奈良線「枚岡」駅からすぐの枚岡神社が登山口。", q: "枚岡駅" },
+  rokko:     { a: "阪急神戸線「芦屋川」駅から高座の滝まで徒歩約25分。帰りは神戸電鉄「有馬温泉」駅から。", q: "芦屋川駅" },
+  kongo:     { a: "南海高野線・近鉄長野線「河内長野」駅から南海バスで「金剛登山口」下車。", q: "金剛登山口 バス停" },
+  misen:     { a: "JR「宮島口」駅から宮島フェリーで約10分、宮島桟橋から大聖院まで徒歩約20分。", q: "大聖院 宮島" },
+  sanbe:     { a: "JR山陰本線「大田市」駅から石見交通バスで三瓶山方面へ。本数が少ないので時刻を確認。", q: "三瓶山 西の原" },
+  iino:      { a: "JR予讃線「丸亀」駅からタクシーで約15分。コミュニティバスもあります。", q: "飯野山 飯野町登山口" },
+  bizan:     { a: "JR「徳島」駅から天神社の登山口まで徒歩約15分。山頂へはロープウェイもあります。", q: "眉山天神社" },
+  homan:     { a: "西鉄太宰府線「太宰府」駅からコミュニティバス「まほろば号」で「内山（竈門神社前）」下車。", q: "竈門神社" },
+  kinpo:     { a: "熊本市街から産交バスで「峠の茶屋」下車、さるすべり登山道の入口まですぐ。", q: "峠の茶屋 熊本市" },
+  inasa:     { a: "JR長崎駅から長崎バスで「ロープウェイ前」下車、淵神社の横から登山道。", q: "淵神社 長崎" },
+  kaimon:    { a: "JR指宿枕崎線「開聞」駅から登山口（かいもん山麓ふれあい公園）まで徒歩約20分。", q: "かいもん山麓ふれあい公園" },
+  katsuu:    { a: "那覇から高速バスで名護バスターミナルへ。そこからタクシーで約20分。", q: "嘉津宇岳" },
+  hamaishi:  { a: "JR東海道線「由比」駅からタクシーで約20分。駅から歩いて登ると片道約2時間半。", q: "由比駅" },
+  ryuso:     { a: "JR静岡駅からしずてつジャストラインで「平山」下車。本数が少ないので時刻を確認。", q: "平山 バス停 静岡市葵区" },
+  mankan:    { a: "JR「焼津」駅からタクシーで約15分。JR「用宗」駅から歩いて登るコースもあります。", q: "花沢の里" },
+  katsuragi: { a: "伊豆箱根鉄道「伊豆長岡」駅から伊豆箱根バスで「伊豆の国パノラマパーク」下車。", q: "伊豆の国パノラマパーク" },
+  daruma:    { a: "伊豆箱根鉄道「修善寺」駅から東海バス戸田行きで「戸田峠」下車。本数が少ないので時刻を確認。", q: "戸田峠" },
+  echizen:   { a: "路線バスは本数が少なく、車かタクシーが便利。JR御殿場線「岩波」駅からタクシーで約25分。", q: "十里木高原駐車場" },
+  choja:     { a: "JR身延線「富士宮」駅から富士急静岡バスで「休暇村富士」下車、田貫湖のそばが登山口。", q: "休暇村富士" },
+  amagi:     { a: "伊豆急行線「伊東」駅から東海バスで「天城縦走路入口」下車（運行日が限られるので確認を）。", q: "天城縦走路入口 バス停" },
+  washizu:   { a: "JR「沼津」駅から伊豆箱根バスで「多比」下車、多比口峠への登山口まで徒歩約10分。", q: "多比 バス停 沼津市" },
+};
+const routeUrl = q => "https://www.google.com/maps/dir/?api=1&travelmode=transit&destination=" + encodeURIComponent(q);
+
 const LV = { 1: { name: "初級", color: "var(--lv1)" }, 2: { name: "初中級", color: "var(--lv2)" } };
 
 const TAGS = {
@@ -373,7 +448,7 @@ const BASE_GEAR = [
   ["健康保険証・現金", "けがをしたとき用"],
 ];
 
-const state = { region: "all", level: "all", sel: "takao", season: currentSeason(), view: "map" };
+const state = { region: "all", level: "all", sel: "takao", season: currentSeason(), view: "map", rec: "all", editing: false, confirmDel: false };
 function currentSeason() {
   const m = new Date().getMonth() + 1;
   return m >= 3 && m <= 5 ? "spring" : m >= 6 && m <= 8 ? "summer" : m >= 9 && m <= 11 ? "autumn" : "winter";
@@ -409,6 +484,8 @@ for (const m of M) {
   const g = el("g", { class: `pin lv${m.lv}`, tabindex: 0, role: "button", "aria-label": `${m.n} ${m.e}メートル ${LV[m.lv].name}` }, gPins);
   el("circle", { class: "ring", cx: x, cy: y, r: 10 }, g);
   el("path", { d: "" }, g);
+  const done = el("g", { class: "done" }, g);
+  el("circle", {}, done); el("path", {}, done);
   const t = el("text", { x, y }, g);
   t.textContent = m.n.replace(/（.*）/, "");
   g.addEventListener("click", () => select(m.id, true));
@@ -463,13 +540,17 @@ function drawPins() {
     t.setAttribute("text-anchor", m.la === "l" ? "end" : "start");
     t.setAttribute("y", m.y + fs * 0.35);
     t.style.display = showLabels || m.id === state.sel ? "" : "none";
+    const bx = m.x + sz * 0.75, by = m.y - sz * 0.75, br = sz * 0.55;
+    const dn = g.querySelector(".done");
+    dn.querySelector("circle").setAttribute("cx", bx); dn.querySelector("circle").setAttribute("cy", by); dn.querySelector("circle").setAttribute("r", br);
+    dn.querySelector("path").setAttribute("d", `M${bx - br * 0.45},${by}L${bx - br * 0.1},${by + br * 0.38}L${bx + br * 0.5},${by - br * 0.35}`);
   }
   insetLabel.setAttribute("font-size", 11 * Math.max(s, 0.4));
 }
 
 function applyFilters() {
   for (const m of M) {
-    const on = (state.level === "all" || String(m.lv) === state.level);
+    const on = (state.level === "all" || String(m.lv) === state.level) && (state.rec === "all" || (state.rec === "done") === records.has(m.id));
     pins[m.id].classList.toggle("dim", !on);
     listBtns[m.id].hidden = state.view === "map" && (!on || !inRegion(m, state.region));
   }
@@ -514,7 +595,7 @@ for (const m of M) {
 }
 
 function select(id, fromUser) {
-  state.sel = id;
+  state.sel = id; state.editing = false; state.confirmDel = false;
   for (const k in pins) {
     pins[k].classList.toggle("sel", k === id);
     listBtns[k].setAttribute("aria-current", k === id);
@@ -571,9 +652,15 @@ function renderPanel() {
       <div class="stat"><small>難易度</small><b class="jp"><span class="lvpill" style="background:${lv.color}">${lv.name}</span></b></div>
       <div class="stat"><small>水の目安</small><b>${waterLiters(m)} L</b></div>
     </div>
+    ${recordHtml(m)}
     <p class="desc">${m.d}</p>
     <button type="button" class="btn3d" id="open3d">${state.view === "3d" ? "日本地図に戻る" : "▲ この山を3D地形で見る"}</button>
     <p class="course">おすすめコース：<b>${m.c}</b></p>
+    <div class="access">
+      <h3 style="margin:0">電車・バスで行くには</h3>
+      <p>${ACCESS[m.id].a}</p>
+      <a href="${routeUrl(ACCESS[m.id].q)}" target="_blank" rel="noopener">Googleマップで現在地からの経路を調べる ↗</a>
+    </div>
 
     <div>
       <div class="season-row">
@@ -866,7 +953,7 @@ function setView(v) {
   document.getElementById("view-3d").setAttribute("aria-pressed", v === "3d");
   svg.style.display = v === "map" ? "" : "none";
   document.getElementById("scene").hidden = v !== "3d";
-  regionsEl.hidden = levelsEl.hidden = v !== "map";
+  regionsEl.hidden = levelsEl.hidden = recEl.hidden = v !== "map";
   document.getElementById("hint").textContent = v === "map"
     ? "地方ボタンで拡大できます。下の山名からも選べます。"
     : "ドラッグで回転、ホイールやピンチで拡大・縮小できます。下の山名を押すと別の山に切り替わります。";
@@ -877,6 +964,134 @@ function setView(v) {
 document.getElementById("view-map").onclick = () => setView("map");
 document.getElementById("view-3d").onclick = () => setView("3d");
 
+// ===== 登頂記録 =====
+// サインインして書き込める人は Claude の db (本人だけが読める data/users/<id>/)、
+// それ以外はこのブラウザの localStorage に保存する。
+const LS_KEY = "teizan-map-records";
+const records = {
+  data: {}, mode: "local", ref: null, queue: Promise.resolve(),
+  has(id) { return !!this.data[id]; },
+  count() { return M.filter(m => this.data[m.id]).length; },
+  loadLocal() {
+    try { const v = JSON.parse(localStorage.getItem(LS_KEY) || "{}"); if (v && typeof v === "object") this.data = v; } catch (e) {}
+  },
+  saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(this.data)); } catch (e) {} },
+  put(id, rec) {
+    if (rec) this.data[id] = rec; else delete this.data[id];
+    this.saveLocal();
+    if (this.mode === "cloud") {
+      const body = { r: JSON.parse(JSON.stringify(this.data)) };
+      this.queue = this.queue.then(() => this.ref.set(body)).catch(e => {
+        if (e && e.code === "invalid_argument") { this.mode = "local"; refreshRecords(); }
+      });
+    }
+    refreshRecords();
+  },
+  async initCloud() {
+    if (!window.claude || !window.claude.use) return;
+    try {
+      const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+      if (!db || !user) return;
+      const uid = await user.id();
+      if (!uid || (await user.can("data.write")) === false) return;
+      this.ref = db.doc("data/users/" + uid + "/summits");
+      const snap = await this.ref.get();
+      const cloud = snap.exists ? (snap.data().r || {}) : {};
+      const merged = { ...this.data, ...cloud };
+      const needsUpload = Object.keys(merged).length !== Object.keys(cloud).length;
+      this.data = merged; this.mode = "cloud"; this.saveLocal();
+      if (needsUpload) await this.ref.set({ r: JSON.parse(JSON.stringify(merged)) });
+      refreshRecords();
+      this.ref.onSnapshot(s => {
+        if (!s.exists || s.metadata.hasPendingWrites) return;
+        this.data = { ...(s.data().r || {}) }; this.saveLocal(); refreshRecords();
+      }, () => {});
+    } catch (e) {
+      this.mode = "local"; refreshRecords();
+    }
+  },
+};
+records.loadLocal();
+
+function refreshRecords() {
+  const n = records.count();
+  document.getElementById("rec-count").textContent = n;
+  document.getElementById("rec-bar").style.width = (n / M.length * 100) + "%";
+  for (const m of M) {
+    pins[m.id].classList.toggle("climbed", records.has(m.id));
+    listBtns[m.id].classList.toggle("climbed", records.has(m.id));
+  }
+  applyFilters(); drawPins(); renderPanel();
+}
+
+const recEl = document.getElementById("recfilter");
+for (const [id, name] of [["all", "すべて"], ["done", "登った山"], ["todo", "まだの山"]]) {
+  const b = document.createElement("button");
+  b.className = "chip"; b.type = "button"; b.textContent = name; b.id = "rec-" + id;
+  b.setAttribute("aria-pressed", id === state.rec);
+  b.onclick = () => {
+    state.rec = id;
+    recEl.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    applyFilters();
+  };
+  recEl.appendChild(b);
+}
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function jpDate(s) {
+  const [y, mo, d] = s.split("-").map(Number);
+  return `${y}年${mo}月${d}日`;
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function recordHtml(m) {
+  const r = records.data[m.id];
+  const where = records.mode === "cloud" ? "Claudeのアカウントに保存（ほかの端末でも同じ記録）" : "このブラウザに保存されます";
+  if (r && !state.editing) {
+    return `<div class="record done">
+      <div class="rec-head"><span class="rec-check" aria-hidden="true">✓</span><b>登頂済み</b><span>${jpDate(r.date)}</span></div>
+      ${r.memo ? `<p class="rec-memo">「${esc(r.memo)}」</p>` : ""}
+      <div class="rec-actions">
+        ${state.confirmDel
+          ? `<span>この記録を消しますか？</span><button type="button" class="rec-btn danger" data-act="del-yes">消す</button><button type="button" class="rec-btn" data-act="del-no">やめる</button>`
+          : `<button type="button" class="rec-btn" data-act="edit">日付・メモを直す</button><button type="button" class="rec-btn" data-act="del">記録を消す</button>`}
+      </div>
+      <small class="rec-where">${where}</small>
+    </div>`;
+  }
+  return `<div class="record">
+    <div class="rec-form">
+      <label for="rec-date">登った日<input type="date" id="rec-date" value="${r ? r.date : todayStr()}" max="${todayStr()}"></label>
+      <label for="rec-memo">ひとことメモ<input type="text" id="rec-memo" maxlength="60" placeholder="例：紅葉がきれいだった" value="${r ? esc(r.memo || "") : ""}"></label>
+      <button type="button" class="rec-save" data-act="save">${r ? "保存する" : "登った！ 記録する"}</button>
+      ${r ? `<button type="button" class="rec-btn" data-act="cancel">やめる</button>` : ""}
+    </div>
+    <small class="rec-where">${where}</small>
+  </div>`;
+}
+
+document.getElementById("panel").addEventListener("click", ev => {
+  const b = ev.target.closest("[data-act]");
+  if (!b) return;
+  const id = state.sel, act = b.dataset.act;
+  if (act === "save") {
+    const date = document.getElementById("rec-date").value || todayStr();
+    const memo = document.getElementById("rec-memo").value.trim().slice(0, 60);
+    state.editing = false;
+    records.put(id, { date, memo });
+  } else if (act === "edit") { state.editing = true; renderPanel(); }
+  else if (act === "cancel") { state.editing = false; renderPanel(); }
+  else if (act === "del") { state.confirmDel = true; renderPanel(); }
+  else if (act === "del-no") { state.confirmDel = false; renderPanel(); }
+  else if (act === "del-yes") { state.confirmDel = false; records.put(id, null); }
+});
+
+document.getElementById("rec-total").textContent = M.length;
 applyFilters();
 select(state.sel, false);
+refreshRecords();
+records.initCloud();
 </script>
