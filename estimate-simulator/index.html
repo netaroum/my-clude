@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>きらりおそうじ見積もり</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<style>
+/* Layout: 左に質問コーナー、右にA4見積書の2分割（DESIGN.md準拠・白ベース固定の単一テーマ） */
+:root {
+  --bg: #FFFFFF; --ink: #2A2A33; --sub: #6E6C78; --line: #ECE7E3;
+  --coral: #FF6B57; --coral-soft: #FFF1EE; --sun: #FFD45C; --sun-soft: #FFF6D6;
+  --font-pop: "Mochiy Pop One", "Hiragino Maru Gothic ProN", "Zen Maru Gothic", sans-serif;
+  --font-body: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--ink); }
+body { margin: 0; font: 400 18px/1.7 var(--font-body); font-variant-numeric: tabular-nums; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+
+/* ===== 1. ヘッダー ===== */
+.top { border-bottom: 1px solid var(--line); padding-block: 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top-in { max-width: 1320px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 24px; }
+.brand { font-family: var(--font-pop); font-size: 28px; line-height: 1.3; margin: 0; text-wrap: balance; }
+.brand span { color: var(--coral); }
+.lead { color: var(--sub); margin: 0; }
+
+.wrap { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 44fr) minmax(0, 56fr); gap: 48px;
+  padding-block: 40px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+
+/* ===== 2. 質問コーナー ===== */
+.panel { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+.q { padding-block: 28px; border-top: 1px solid var(--line); }
+.q:first-child { border-top: 0; padding-top: 0; }
+.q h2 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+.q .hint { color: var(--sub); font-size: 16px; margin: 0 0 16px; }
+.qno { display: inline-block; font-family: var(--font-pop); color: var(--coral); font-size: 18px; margin-right: 8px; }
+.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.plan { position: relative; text-align: left; background: var(--bg); border: 1px solid var(--line); border-radius: 16px; padding: 16px; cursor: pointer;
+  transition: border-color .2s, background .2s, transform .1s; }
+.plan b { display: block; font-family: var(--font-pop); font-size: 28px; font-weight: 400; line-height: 1.2; }
+.plan small { display: block; color: var(--sub); font-size: 15px; line-height: 1.5; }
+.plan .p-name { font-weight: 700; font-size: 18px; }
+.on { border-color: var(--coral) !important; background: var(--coral-soft) !important; }
+.badge { position: absolute; top: -10px; right: 10px; background: var(--sun); font-size: 13px; font-weight: 700; padding: 1px 10px; border-radius: 999px; }
+.pills { display: flex; flex-wrap: wrap; gap: 10px; }
+.pill { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 10px 22px; cursor: pointer; transition: border-color .2s, background .2s, transform .1s; }
+.plan:active, .pill:active, .print-btn:active { transform: scale(.97); }
+.slider-row { display: flex; align-items: center; gap: 16px; }
+.slider-row input { flex: 1; min-width: 0; accent-color: var(--coral); height: 28px; }
+.count { font-family: var(--font-pop); font-size: 28px; min-width: 3.2em; text-align: right; }
+.chip { display: inline-block; margin-top: 10px; background: var(--sun-soft); border-radius: 999px; padding: 2px 14px; font-size: 16px; }
+.checks { display: grid; gap: 4px; }
+.check { display: flex; align-items: center; gap: 12px; padding: 10px 0; cursor: pointer; }
+.check input { width: 22px; height: 22px; accent-color: var(--coral); flex: none; }
+.check .price { margin-left: auto; color: var(--sub); }
+.name-input { width: 100%; border: 0; border-bottom: 1px solid var(--line); padding: 8px 0; font-size: 22px; background: transparent; }
+.name-input:focus { outline: none; border-bottom-color: var(--coral); }
+.appear { animation: fadeUp .45s ease-out both; }
+.print-box { padding-top: 28px; border-top: 1px solid var(--line); }
+.print-btn { width: 100%; border: 0; border-radius: 999px; background: var(--coral); color: #FFFFFF; font-weight: 700; font-size: 20px; padding: 16px 24px; cursor: pointer; transition: transform .1s, filter .2s; }
+.print-btn:hover { filter: brightness(1.05); }
+.print-note { color: var(--sub); font-size: 14px; line-height: 1.6; margin: 12px 0 0; }
+
+/* ===== 3. 見積書（A4） ===== */
+.sheet-area { min-width: 0; }
+.sheet-sticky { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); }
+.sheet { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; box-shadow: 0 18px 50px -24px rgba(42, 42, 51, .25);
+  width: 100%; max-width: 794px; min-height: 1123px; margin: 0 auto; padding: 56px 56px 48px; display: flex; flex-direction: column; gap: 28px; }
+.s-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; padding-bottom: 16px; border-bottom: 2px solid var(--ink); }
+.s-title { font-family: var(--font-pop); font-size: 44px; line-height: 1; margin: 0; letter-spacing: .2em; }
+.s-meta { font-size: 15px; color: var(--sub); text-align: right; line-height: 1.6; }
+.s-meta div { white-space: nowrap; }
+.s-parties { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 290px); gap: 32px; align-items: start; }
+.to-name { font-size: 28px; font-weight: 700; border-bottom: 1px solid var(--ink); padding-bottom: 4px; margin: 0 0 8px; overflow-wrap: anywhere; }
+.to-name small { font-size: 20px; margin-left: 8px; }
+.to-text { color: var(--sub); font-size: 16px; margin: 0; }
+.from { font-size: 15px; line-height: 1.7; }
+.from div { display: block; }
+.from .co { font-weight: 700; font-size: 18px; margin-bottom: 2px; }
+.total-box { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; background: var(--coral-soft); border-radius: 12px; padding: 20px 28px; }
+.total-box .lbl { font-weight: 700; }
+.total-num { font-family: var(--font-pop); font-size: 44px; line-height: 1.1; color: var(--coral); }
+.total-num small { font-size: 22px; margin-left: 4px; color: var(--ink); }
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 16px; }
+th { text-align: left; font-weight: 500; font-size: 13px; color: var(--sub); letter-spacing: .08em; padding: 8px 6px; border-bottom: 1px solid var(--ink); }
+td { padding: 10px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.num { text-align: right; white-space: nowrap; }
+td .note { display: block; font-size: 13px; color: var(--sub); }
+tr.row { animation: fadeUp .45s ease-out both; }
+tr.flash td { animation: flash .9s ease-out; }
+tr.minus td { color: var(--coral); font-weight: 700; }
+tr.plus td:first-child { font-weight: 700; }
+.sums { margin-left: auto; width: min(100%, 320px); font-size: 16px; }
+.sums div { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.sums .grand { font-weight: 700; font-size: 20px; border-bottom: 2px solid var(--ink); }
+.remarks { margin-top: auto; font-size: 14px; color: var(--sub); border-top: 1px solid var(--line); padding-top: 16px; }
+.remarks p { margin: 0; }
+@media (max-width: 640px) {
+  .sheet { padding: 28px 18px; min-height: 0; }
+  .s-parties { grid-template-columns: minmax(0, 1fr); }
+  .s-title { font-size: 32px; }
+  .total-num { font-size: 34px; }
+  .plans { grid-template-columns: minmax(0, 1fr); }
+}
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes flash { 0% { background: var(--sun); } 100% { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ===== 4. 印刷（A4見積書だけを1枚に） ===== */
+@page { size: A4; margin: 0; }
+@media print {
+  html, body { background: #FFFFFF; }
+  .top, .panel { display: none !important; }
+  .wrap { display: block; padding: 0; max-width: none; }
+  .sheet-sticky { position: static; }
+  .sheet { width: 210mm; max-width: none; height: 296mm; min-height: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none;
+    padding: 14mm 15mm 12mm; gap: 6mm; overflow: hidden; break-inside: avoid; page-break-after: avoid; }
+  .s-parties { grid-template-columns: minmax(0, 1fr) 66mm; }
+  .total-box, tr.minus td, tr.flash td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  tr.row, tr.flash td { animation: none !important; }
+  .sheet > * { flex-shrink: 0; }
+  .tbl-wrap { overflow: visible; }
+  .s-title { font-size: 36px; }
+  .total-box { padding: 12px 24px; }
+  .total-num { font-size: 38px; }
+  table, .sums { font-size: 13px; }
+  td { padding: 5px 6px; }
+  td .note { display: inline; margin-left: 8px; font-size: 11px; }
+  .sums div { padding: 3px 0; }
+  .sums .grand { font-size: 16px; }
+  .remarks { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+<script>
+const { useState, useEffect, useRef, useMemo } = React;
+const html = htm.bind(React.createElement);
+const yen = (n) => "¥" + Math.round(n).toLocaleString("ja-JP");
+
+// ---- 料金表 ----
+const PLANS = {
+  ume:   { mark: "梅", name: "スッキリ", desc: "水まわり2か所", items: [["キッチン", 12000], ["浴室", 12000]] },
+  take:  { mark: "竹", name: "しっかり", desc: "水まわり4か所", items: [["キッチン", 12000], ["浴室", 12000], ["トイレ", 8000], ["洗面所", 7000]] },
+  matsu: { mark: "松", name: "まるごと", desc: "水まわり＋お部屋全体", items: [["キッチン", 12000], ["浴室", 12000], ["トイレ", 8000], ["洗面所", 7000], ["床ワックスがけ", 15000], ["窓・サッシ", 12000]] },
+};
+const ROOMS = { "1K": 1, "2LDK": 1.4, "3LDK以上": 1.8 };
+const AIRCON = 11000, BULK = 3, TRAVEL = 3300;
+const OPTIONS = [["fan", "換気扇（レンジフード）", 9800], ["mold", "浴室の防カビコート", 5500], ["veranda", "ベランダ・バルコニー", 6600]];
+const RUSH = { week: ["1週間以内", 0.3], tomorrow: ["明日", 0.5] };
+
+// 見積番号：開いた日付から自動作成
+const now = new Date();
+const pad = (n) => String(n).padStart(2, "0");
+const ymd = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+const QUOTE_NO = `KR-${ymd}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+const fmtDate = (d) => `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+const LIMIT = new Date(now.getTime() + 30 * 864e5);
+
+function useCountUp(value, ms = 700) {
+  const [shown, setShown] = useState(value);
+  const from = useRef(value);
+  useEffect(() => {
+    const start = performance.now(), a = from.current;
+    let id;
+    const step = (t) => {
+      const p = Math.min(1, (t - start) / ms), e = 1 - Math.pow(1 - p, 3);
+      const v = a + (value - a) * e;
+      from.current = v; setShown(v);
+      if (p < 1) id = requestAnimationFrame(step);
+    };
+    id = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(id);
+  }, [value]);
+  return shown;
+}
+
+function Row({ r }) {
+  const prev = useRef(r.amount);
+  const [flash, setFlash] = useState(false);
+  useEffect(() => {
+    if (prev.current !== r.amount) {
+      prev.current = r.amount; setFlash(false);
+      requestAnimationFrame(() => setFlash(true));
+      const t = setTimeout(() => setFlash(false), 900);
+      return () => clearTimeout(t);
+    }
+  }, [r.amount]);
+  return html`<tr className=${["row", flash && "flash", r.kind].filter(Boolean).join(" ")}>
+    <td>${r.name}${r.note && html`<span className="note">${r.note}</span>`}</td>
+    <td className="num">${r.qty}</td>
+    <td className="num">${r.unit == null ? "" : yen(r.unit)}</td>
+    <td className="num">${r.amount < 0 ? "−" + yen(-r.amount) : yen(r.amount)}</td>
+  </tr>`;
+}
+
+function App() {
+  // 開いた瞬間からおすすめが選択済み
+  const [plan, setPlan] = useState("take");
+  const [room, setRoom] = useState("2LDK");
+  const [aircon, setAircon] = useState(3);
+  const [opts, setOpts] = useState({ fan: true, mold: false, veranda: false });
+  const [rush, setRush] = useState(false);
+  const [when, setWhen] = useState("week");
+  const [name, setName] = useState("山田 花子");
+
+  const { rows, subtotal, tax, total } = useMemo(() => {
+    const f = ROOMS[room], rows = [];
+    PLANS[plan].items.forEach(([n, p]) => {
+      const unit = Math.round(p * f / 100) * 100;
+      rows.push({ key: plan + n, name: n, note: `${PLANS[plan].mark}プラン・${room}`, qty: "1式", unit, amount: unit });
+    });
+    if (aircon > 0) {
+      rows.push({ key: "ac", name: "エアコンクリーニング", note: "壁掛けタイプ", qty: `${aircon}台`, unit: AIRCON, amount: AIRCON * aircon });
+      if (aircon >= BULK) rows.push({ key: "bulk", kind: "minus", name: "⭐まとめ割 適用中", note: `エアコン${BULK}台以上で10%オフ`, qty: "", unit: null, amount: -Math.round(AIRCON * aircon * 0.1) });
+    }
+    OPTIONS.forEach(([k, n, p]) => opts[k] && rows.push({ key: k, name: n, note: "オプション", qty: "1式", unit: p, amount: p }));
+    rows.push(plan === "matsu"
+      ? { key: "travel", name: "出張費", note: "松プラン特典で無料", qty: "1回", unit: TRAVEL, amount: 0 }
+      : { key: "travel", name: "出張費", note: "", qty: "1回", unit: TRAVEL, amount: TRAVEL });
+    if (rush) {
+      const base = rows.reduce((s, r) => s + r.amount, 0), [label, rate] = RUSH[when];
+      rows.push({ key: "rush", kind: "plus", name: `🚀特急料金（+${rate * 100}%）`, note: `${label}に作業`, qty: "", unit: null, amount: Math.round(base * rate) });
+    }
+    const subtotal = rows.reduce((s, r) => s + r.amount, 0), tax = Math.floor(subtotal * 0.1);
+    return { rows, subtotal, tax, total: subtotal + tax };
+  }, [plan, room, aircon, opts, rush, when]);
+
+  const shownTotal = useCountUp(total);
+  const inFrame = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+  const [msg, setMsg] = useState("");
+  const doPrint = () => {
+    if (inFrame) { setMsg("このプレビュー内では印刷画面が開けません。ダウンロードしたファイルを Chrome などで開いてからボタンを押してください。"); return; }
+    window.print();
+  };
+
+  return html`
+  <header className="top"><div className="top-in">
+    <h1 className="brand">きらり<span>ハウスクリーニング</span> 見積もりシミュレーター</h1>
+    <p className="lead">左で選ぶと、右の見積書がその場で変わります。</p>
+  </div></header>
+
+  <main className="wrap">
+    <section className="panel" aria-label="質問コーナー">
+      <div className="q">
+        <h2><span className="qno">Q1</span>プランを選んでください</h2>
+        <p className="hint">松・竹・梅で、おそうじする場所がまるごと入れ替わります。</p>
+        <div className="plans">
+          ${["ume", "take", "matsu"].map((k) => html`
+            <button key=${k} id=${"plan-" + k} className=${"plan" + (plan === k ? " on" : "")} aria-pressed=${plan === k} onClick=${() => setPlan(k)}>
+              ${k === "take" && html`<span className="badge">おすすめ</span>`}
+              <b>${PLANS[k].mark}</b><span className="p-name">${PLANS[k].name}</span><small>${PLANS[k].desc}</small>
+            </button>`)}
+        </div>
+      </div>
+
+      <div className="q">
+        <h2><span className="qno">Q2</span>お部屋の広さは？</h2>
+        <p className="hint">広いほど作業時間が増えるため、プランの料金が変わります。</p>
+        <div className="pills">
+          ${Object.keys(ROOMS).map((k) => html`<button key=${k} id=${"room-" + k} className=${"pill" + (room === k ? " on" : "")} aria-pressed=${room === k} onClick=${() => setRoom(k)}>${k}</button>`)}
+        </div>
+      </div>
+
+      <div className="q">
+        <h2><span className="qno">Q3</span>エアコンは何台？</h2>
+        <p className="hint">1台 ${yen(AIRCON)}。${BULK}台以上で10%オフになります。</p>
+        <div className="slider-row">
+          <input id="aircon" type="range" min="0" max="8" value=${aircon} onInput=${(e) => setAircon(+e.target.value)} aria-label="エアコンの台数" />
+          <span className="count">${aircon}台</span>
+        </div>
+        ${aircon >= BULK
+          ? html`<span className="chip appear">⭐まとめ割 適用中</span>`
+          : html`<span className="chip">あと${BULK - aircon}台でまとめ割</span>`}
+      </div>
+
+      <div className="q">
+        <h2><span className="qno">Q4</span>追加したいオプション</h2>
+        <div className="checks">
+          ${OPTIONS.map(([k, n, p]) => html`
+            <label key=${k} className="check">
+              <input id=${"opt-" + k} type="checkbox" checked=${opts[k]} onChange=${(e) => setOpts({ ...opts, [k]: e.target.checked })} />
+              <span>${n}</span><span className="price">${yen(p)}</span>
+            </label>`)}
+        </div>
+      </div>
+
+      <div className="q">
+        <h2><span className="qno">Q5</span>お急ぎですか？</h2>
+        <div className="pills">
+          <button id="rush-no" className=${"pill" + (!rush ? " on" : "")} aria-pressed=${!rush} onClick=${() => setRush(false)}>いいえ</button>
+          <button id="rush-yes" className=${"pill" + (rush ? " on" : "")} aria-pressed=${rush} onClick=${() => setRush(true)}>はい、急ぎです</button>
+        </div>
+      </div>
+
+      ${rush && html`
+      <div className="q appear">
+        <h2><span className="qno">Q6</span>いつまでに？</h2>
+        <p className="hint">特急料金がかかります。</p>
+        <div className="pills">
+          ${Object.entries(RUSH).map(([k, [l, r]]) => html`<button key=${k} id=${"when-" + k} className=${"pill" + (when === k ? " on" : "")} aria-pressed=${when === k} onClick=${() => setWhen(k)}>${l}（+${r * 100}%）</button>`)}
+        </div>
+      </div>`}
+
+      <div className="q">
+        <h2>見積書のお名前</h2>
+        <input id="name" className="name-input" value=${name} onInput=${(e) => setName(e.target.value)} aria-label="お名前" />
+      </div>
+
+      <div className="print-box">
+        <button className="print-btn" onClick=${doPrint}>この内容で印刷（PDF保存）</button>
+        <p className="print-note">Mac・Windows とも、印刷画面の送信先（プリンター）で「PDFとして保存」を選ぶと PDF になります。</p>
+        ${msg && html`<p className="print-note appear" role="status">${msg}</p>`}
+      </div>
+    </section>
+
+    <section className="sheet-area" aria-label="見積書">
+      <div className="sheet-sticky"><article className="sheet">
+        <div className="s-head">
+          <h2 className="s-title">御見積書</h2>
+          <div className="s-meta">
+            <div>見積番号　${QUOTE_NO}</div>
+            <div>発行日　${fmtDate(now)}</div>
+            <div>有効期限　${fmtDate(LIMIT)}</div>
+          </div>
+        </div>
+
+        <div className="s-parties">
+          <div>
+            <p className="to-name">${name || "お客様"}<small>様</small></p>
+            <p className="to-text">このたびはお問い合わせありがとうございます。下記の通りお見積り申し上げます。</p>
+          </div>
+          <div className="from">
+            <div className="co">きらりハウスクリーニング</div>
+            <div>〒150-0001</div>
+            <div>東京都渋谷区神宮前1-2-3 きらりビル2F</div>
+            <div>TEL 03-1234-5678</div>
+            <div>info@kirari-clean.example</div>
+          </div>
+        </div>
+
+        <div className="total-box">
+          <span className="lbl">お見積金額（税込）</span>
+          <span className="total-num">${yen(shownTotal)}</span>
+        </div>
+
+        <div className="tbl-wrap"><table>
+          <thead><tr><th>品目</th><th className="num">数量</th><th className="num">単価</th><th className="num">金額</th></tr></thead>
+          <tbody>${rows.map((r) => html`<${Row} key=${r.key} r=${r} />`)}</tbody>
+        </table></div>
+
+        <div className="sums">
+          <div><span>小計</span><span>${yen(subtotal)}</span></div>
+          <div><span>消費税（10%）</span><span>${yen(tax)}</span></div>
+          <div className="grand"><span>合計</span><span>${yen(total)}</span></div>
+        </div>
+
+        <div className="remarks">
+          <p>備考：作業時間の目安は ${PLANS[plan].mark}プランで ${{ ume: "約2", take: "約4", matsu: "約7" }[plan]}時間です。駐車スペースが無い場合は別途駐車場代をいただきます。</p>
+        </div>
+      </article></div>
+    </section>
+  </main>`;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App} />`);
+</script>
+</body>
+</html>
