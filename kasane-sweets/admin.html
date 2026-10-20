@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>管理画面｜東京かさね菓子店</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FFFFFF;--soft:#FAF7F3;--ink:#2B2420;--sub:#6F655D;--brick:#B0472E;--brick-soft:#F8ECE8;--gold:#E2B04F;--gold-soft:#FBF3E1;--gold-ink:#86601A;--line:#ECE4DB;--ok:#3E8A57;--ok-soft:#E8F3EB;--gray:#9A918A;--gray-soft:#F2EFEC;--shadow:0 18px 40px -24px rgba(43,36,32,.25);--mincho:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#FFFFFF;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:18px;line-height:1.85;font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{font-family:var(--mincho);font-weight:700;line-height:1.4;margin:0}
+a{color:var(--brick)}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* header */
+.top{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1280px;margin:0 auto;padding:12px 32px 0;display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;margin-right:auto;min-width:0}
+.mark{flex:none;width:44px;height:44px;border-radius:12px;background:var(--brick);color:#fff;display:grid;place-items:center;font-family:var(--mincho);font-size:22px}
+.brand b{font-family:var(--mincho);font-size:22px;display:block;line-height:1.3}
+.brand small{display:block;font-size:14px;color:var(--sub);line-height:1.5}
+.sync{font-size:14px;color:var(--sub)}
+.homelink{font-size:14px;font-weight:700;text-decoration:none;border-bottom:1px solid currentColor}
+.tabs{max-width:1280px;margin:0 auto;padding:4px 32px 0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{appearance:none;border:0;background:none;font-size:18px;color:var(--sub);padding:10px 16px 12px;border-bottom:2px solid transparent;white-space:nowrap;cursor:pointer}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--brick);font-weight:700}
+.cnt{display:inline-block;min-width:24px;margin-left:6px;padding:0 8px;border-radius:999px;background:var(--gold);color:var(--ink);font-size:14px;line-height:22px;text-align:center;font-weight:700}
+.cnt:empty{display:none}
+/* buttons */
+.btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;border:1px solid var(--line);background:#fff;padding:8px 20px;font-size:18px;line-height:1.5;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s;white-space:nowrap;text-decoration:none;color:var(--ink)}
+.btn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.btn-primary{background:var(--brick);border-color:var(--brick);color:#fff;font-weight:700}
+.btn-dark{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:700}
+.btn-ghost{background:transparent}
+.btn-sm{font-size:14px;padding:4px 14px}
+/* layout */
+.wrap{max-width:1280px;margin:0 auto;padding:40px 32px 128px}
+.panel[hidden]{display:none}
+.panel.fade{animation:fade .45s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.ph h2{font-size:28px}
+.ph p{margin:4px 0 0;color:var(--sub)}
+.eyebrow{font-size:14px;letter-spacing:.12em;color:var(--brick);font-weight:700}
+.hint{background:var(--gold-soft);border:1px solid #F1DDAE;border-radius:20px;padding:16px 24px;margin-bottom:32px}
+.hint h3{font-size:18px}
+.hint ul{margin:4px 0 0;padding-left:1.2em}
+.hint li::marker{color:var(--gold-ink)}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;min-width:0}
+.card>h3{font-size:22px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card>h3 small{font-family:inherit;font-weight:400;font-size:14px;color:var(--sub)}
+.muted{color:var(--sub)}
+.small{font-size:14px}
+.grid{display:grid;gap:24px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin-bottom:24px}
+.kpi{position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.kpi .lb{font-size:14px;color:var(--sub);font-weight:700;letter-spacing:.06em}
+.kpi .v{font-family:var(--mincho);font-size:40px;line-height:1.3;margin-top:4px}
+.kpi .v small{font-size:18px;margin-left:4px;color:var(--sub)}
+.kpi .ft{font-size:14px;color:var(--sub)}
+.kpi::after{content:"";position:absolute;right:-24px;top:-24px;width:96px;height:96px;border-radius:50%;background:var(--gold-soft)}
+.kpi.hot::after{background:var(--brick-soft)}
+.kpi>*{position:relative;z-index:1}
+.g2{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);margin-bottom:24px}
+.brief{display:flex;gap:16px;align-items:flex-start;background:var(--soft);border-radius:20px;padding:16px 24px;margin-bottom:24px;border:1px solid var(--line)}
+.brief .ai{flex:none;width:40px;height:40px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:700;margin-top:4px}
+.brief p{margin:0}
+.chart svg{width:100%;height:auto;display:block}
+.stack{display:flex;height:16px;border-radius:999px;overflow:hidden;background:var(--gray-soft);margin:8px 0 16px}
+.stack span{display:block;height:100%;transition:width .6s ease}
+.legend{list-style:none;margin:0;padding:0}
+.legend li{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.legend li:last-child{border-bottom:0}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.legend .n{margin-left:auto;font-weight:700}
+.log{list-style:none;margin:0;padding:0}
+.log li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 16px;padding:12px 0;border-bottom:1px solid var(--line)}
+.log li:last-child{border-bottom:0}
+.log time{font-size:14px;color:var(--sub);white-space:nowrap}
+.log .c{grid-column:2;font-size:14px;color:var(--sub)}
+/* badges */
+.tier{display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:1.6;padding:2px 12px;border-radius:999px;font-weight:700;white-space:nowrap}
+.tier::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.t-auto{background:var(--ok-soft);color:var(--ok)}
+.t-review{background:var(--gold-soft);color:var(--gold-ink)}
+.t-reject{background:var(--gray-soft);color:var(--sub)}
+.tag{display:inline-block;font-size:14px;line-height:1.6;padding:1px 10px;border-radius:999px;border:1px solid var(--line);color:var(--sub);white-space:nowrap}
+.tag.stage{border-color:var(--brick);color:var(--brick)}
+mark{background:var(--gold-soft);color:inherit;box-shadow:inset 0 -3px 0 var(--gold);padding:0 1px}
+/* inbox */
+.tools{display:flex;gap:8px 16px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{appearance:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 16px;font-size:18px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip b{font-weight:400;opacity:.7;margin-left:4px}
+.search{flex:1 1 240px;min-width:0;border:1px solid var(--line);border-radius:12px;padding:8px 16px;font-size:18px;background:var(--soft)}
+.inbox{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:24px;align-items:start}
+.list{border:1px solid var(--line);border-radius:20px;overflow:auto;max-height:calc(100vh - 230px);min-height:200px}
+.item{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:#fff;padding:16px;cursor:pointer;transition:background .2s}
+.item:hover{background:var(--soft)}
+.item[aria-current="true"]{background:var(--soft);box-shadow:inset 3px 0 0 var(--brick)}
+.item .row{display:flex;gap:8px;align-items:center;min-width:0}
+.item .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.item .tm{margin-left:auto;font-size:14px;color:var(--sub);white-space:nowrap}
+.item .sn{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--sub);overflow-wrap:anywhere}
+.item .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.empty{padding:40px 24px;text-align:center;color:var(--sub)}
+.detail .hd{display:flex;gap:24px;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.detail .hd h3{font-size:28px;overflow-wrap:anywhere}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:0 0 24px}
+.facts div{background:#fff;padding:8px 16px;min-width:0}
+.facts dt{font-size:14px;color:var(--sub)}
+.facts dd{margin:0;overflow-wrap:anywhere}
+.msg{background:var(--soft);border-radius:12px;padding:16px 24px;white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 24px}
+.sec{font-size:18px;margin:24px 0 8px}
+.reasons{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.reasons li{display:flex;gap:12px;align-items:baseline}
+.pt{flex:none;min-width:48px;text-align:center;font-size:14px;font-weight:700;border-radius:999px;padding:0 8px}
+.pt.p{background:var(--ok-soft);color:var(--ok)}
+.pt.m{background:var(--brick-soft);color:var(--brick)}
+.steps{display:flex;list-style:none;margin:8px 0 0;padding:0;counter-reset:s;flex-wrap:wrap;gap:4px 0}
+.steps li{flex:1 1 0;min-width:72px;position:relative;text-align:center;font-size:14px;color:var(--sub);padding-top:28px}
+.steps li::before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:14px;height:14px;border-radius:50%;background:#fff;border:1px solid var(--line);z-index:1}
+.steps li::after{content:"";position:absolute;top:14px;left:-50%;width:100%;height:1px;background:var(--line)}
+.steps li:first-child::after{display:none}
+.steps li.done{color:var(--ink)}
+.steps li.done::before{background:var(--ok);border-color:var(--ok)}
+.steps li.now{color:var(--brick);font-weight:700}
+.steps li.now::before{background:var(--brick);border-color:var(--brick);box-shadow:0 0 0 4px var(--brick-soft)}
+.steps li.x{color:var(--sub);font-weight:700}
+.steps li.x::before{background:var(--gray);border-color:var(--gray)}
+.reply{width:100%;min-height:260px;border:1px solid var(--line);border-radius:12px;padding:16px;font-size:18px;line-height:1.85;resize:vertical;background:#fff}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.hist{list-style:none;margin:0;padding:0 0 0 16px;border-left:1px solid var(--line)}
+.hist li{position:relative;padding:4px 0 8px 8px}
+.hist li::before{content:"";position:absolute;left:-21px;top:14px;width:9px;height:9px;border-radius:50%;background:var(--gold)}
+.hist .w{font-size:14px;color:var(--sub)}
+.ring{flex:none;display:block}
+.ring text{font-family:var(--mincho);font-weight:700}
+/* gate */
+.gsum{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.gates{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.gcard{display:flex;flex-direction:column;gap:12px;transition:transform .25s,box-shadow .25s}
+.gcard:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.gcard .top2{display:flex;gap:16px;align-items:center}
+.gcard h4{font-size:22px;overflow-wrap:anywhere}
+.gcard .ex{margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:var(--sub);overflow-wrap:anywhere}
+.gcard .acts{margin-top:auto}
+.rec{font-size:14px;color:var(--sub)}
+/* board */
+.totals{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.tot{border:1px solid var(--line);border-radius:20px;padding:8px 20px;background:#fff;min-width:150px}
+.tot .d{font-size:14px;color:var(--sub)}
+.tot .q{font-family:var(--mincho);font-size:28px}
+.tot.today{border-color:var(--brick);background:var(--brick-soft)}
+.kanban{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:start}
+.col{background:var(--soft);border-radius:20px;padding:16px;min-width:0}
+.col h3{font-size:18px;display:flex;justify-content:space-between;margin-bottom:12px}
+.kc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:12px;transition:transform .25s,box-shadow .25s}
+.kc:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.kc .nm{font-weight:700;overflow-wrap:anywhere}
+.kc .q{font-family:var(--mincho);font-size:22px}
+.kc .acts{margin-top:8px}
+/* settings */
+.g2s{grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin-bottom:24px}
+.sl{margin-bottom:24px}
+.sl label{display:flex;justify-content:space-between;font-weight:700}
+.sl output{font-family:var(--mincho);font-size:22px;color:var(--brick)}
+.sl input{width:100%;accent-color:var(--brick)}
+.preview{display:flex;height:40px;border-radius:12px;overflow:hidden;font-size:14px;font-weight:700}
+.preview span{display:grid;place-items:center;min-width:0;overflow:hidden;white-space:nowrap;transition:flex-basis .3s}
+.diagram{overflow-x:auto;border-radius:24px;border:1px solid var(--line);background:var(--soft);margin:0 0 24px}
+.diagram svg{display:block;width:100%;min-width:760px;height:auto}
+.dg-t{font-family:var(--mincho);font-size:20px;font-weight:700;fill:#2B2420}
+.dg-s{font-size:15px;fill:#6F655D}
+.dg-m{font-family:var(--mono);font-size:15px;fill:#B0472E}
+.dg-l{font-size:14px;fill:#B0472E;font-weight:700;letter-spacing:.1em}
+.dg-n{font-size:14px;font-weight:700;fill:#2B2420}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:14px;color:var(--sub);font-weight:700}
+td code{font-family:var(--mono);font-size:16px;color:var(--brick)}
+/* modal & toast */
+.backdrop{position:fixed;inset:0;z-index:50;background:rgba(43,36,32,.38);display:grid;place-items:center;padding:16px;opacity:0;transition:opacity .2s}
+.backdrop.in{opacity:1}
+.modal{width:100%;max-width:560px;max-height:calc(100vh - 32px);overflow:auto;background:#fff;border-radius:20px;padding:32px;box-shadow:var(--shadow);transform:translateY(12px);transition:transform .25s}
+.backdrop.in .modal{transform:none}
+.modal h3{font-size:22px;margin-bottom:8px}
+.mlead{color:var(--sub);margin:0 0 16px}
+.msum{background:var(--soft);border-radius:12px;padding:12px 16px;margin-bottom:16px;overflow-wrap:anywhere}
+.modal label{display:block;font-size:14px;font-weight:700;color:var(--sub);margin-bottom:4px}
+.modal textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:18px;resize:vertical}
+.mact{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:24px;z-index:60;transform:translate(-50%,24px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;border-radius:999px;padding:12px 24px;font-size:18px;max-width:calc(100vw - 32px);box-shadow:var(--shadow);transition:opacity .3s,transform .3s;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--gold);margin-right:10px;vertical-align:middle}
+@media (max-width:1000px){.g2,.g2s{grid-template-columns:minmax(0,1fr)}.inbox{grid-template-columns:minmax(0,1fr)}.list{max-height:480px}.kanban{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.top-in{padding:8px 16px 0}.tabs{padding:0 8px}.wrap{padding:24px 16px 80px}.brand small{display:none}.sync{display:none}.kanban{grid-template-columns:minmax(0,1fr)}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}.gates{grid-template-columns:minmax(0,1fr)}.card{padding:16px}.modal{padding:24px}.detail .hd{flex-direction:column-reverse;gap:8px}.ph h2{font-size:22px}.kpi .v{font-size:28px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.btn:hover,.kpi:hover,.gcard:hover,.kc:hover{transform:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="mark" aria-hidden="true">重</span><div><b>東京かさね菓子店 管理画面</b><small>AI受付アシスタント（モック）／東京駅 改札内1F 赤れんが通り</small></div></div>
+    <span class="sync" id="sync"></span>
+    <button class="btn btn-sm" id="refresh" type="button">更新</button>
+    <a href="index.html" class="homelink">ホームページを見る</a>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="管理メニュー">
+    <button class="tab" role="tab" data-tab="dash" id="t-dash" aria-controls="p-dash">ダッシュボード</button>
+    <button class="tab" role="tab" data-tab="inbox" id="t-inbox" aria-controls="p-inbox">受信箱（AI判定）<span class="cnt" id="c-inbox"></span></button>
+    <button class="tab" role="tab" data-tab="gate" id="t-gate" aria-controls="p-gate">承認ゲート<span class="cnt" id="c-gate"></span></button>
+    <button class="tab" role="tab" data-tab="board" id="t-board" aria-controls="p-board">取り置き・製造ボード<span class="cnt" id="c-board"></span></button>
+    <button class="tab" role="tab" data-tab="settings" id="t-settings" aria-controls="p-settings">設定・図解</button>
+  </nav>
+</header>
+
+<main class="wrap">
+  <section class="panel" id="p-dash" role="tabpanel" aria-labelledby="t-dash">
+    <div class="ph"><div><div class="eyebrow">DASHBOARD</div><h2>きょうの状況</h2><p id="dashDate"></p></div></div>
+    <div class="brief"><span class="ai" aria-hidden="true">AI</span><p id="brief"></p></div>
+    <div class="grid kpis" id="kpis"></div>
+    <div class="grid g2">
+      <div class="card chart"><h3>行列予測（待ち時間）<small>過去の来店傾向からの推定・モック</small></h3><div id="chart"></div></div>
+      <div class="card"><h3>AI判定の内訳<small id="tierTotal"></small></h3><div class="stack" id="stack"></div><ul class="legend" id="legend"></ul></div>
+    </div>
+    <div class="card"><h3>最近の操作履歴<small>kasane.auditLog</small></h3><ul class="log" id="dashLog"></ul></div>
+    <aside class="hint" style="margin:32px 0 0"><h3>💡 この画面でAIに頼むと良いこと</h3><ul><li>「今日の承認待ちを、急ぎ順に3行で要約して」</li><li>「行列予測が40分を超える時間帯に、SNSで出す混雑案内の文面を作って」</li><li>「先週と比べて取り置き予約が増えた理由の仮説を3つ挙げて」</li></ul></aside>
+  </section>
+
+  <section class="panel" id="p-inbox" role="tabpanel" aria-labelledby="t-inbox" hidden>
+    <div class="ph"><div><div class="eyebrow">INBOX</div><h2>受信箱（AI判定）</h2><p>すべてのお問い合わせをAIが0〜100点で採点し、3段階に振り分けています。</p></div></div>
+    <aside class="hint"><h3>💡 この画面でAIに頼むと良いこと</h3><ul><li>「この返信文を、もう少しやわらかい敬語に直して」</li><li>「アレルギーの質問への回答テンプレートを、原材料表にもとづいて作って」</li><li>「却下判定のうち、本当はお客様かもしれないものを見直して」</li></ul></aside>
+    <div class="tools"><div class="chips" id="chips" role="group" aria-label="判定で絞り込み"></div><input class="search" id="search" type="search" placeholder="名前・本文・メールで検索" aria-label="お問い合わせを検索"></div>
+    <div class="inbox"><div class="list" id="list" aria-label="お問い合わせ一覧"></div><div class="card detail" id="detail" aria-live="polite"></div></div>
+  </section>
+
+  <section class="panel" id="p-gate" role="tabpanel" aria-labelledby="t-gate" hidden>
+    <div class="ph"><div><div class="eyebrow">HANDOFF GATE</div><h2>承認ゲート</h2><p>AIは「提案」まで。人が承認したものだけが「対応中」へ進みます。</p></div></div>
+    <aside class="hint"><h3>💡 この画面でAIに頼むと良いこと</h3><ul><li>「承認待ちのうち、今日中に返事が必要なものだけ並べて」</li><li>「300個の団体注文を受けた場合、他の取り置きに影響が出る日を教えて」</li></ul></aside>
+    <div class="gsum" id="gsum"></div>
+    <div class="grid gates" id="gates"></div>
+    <div id="returned"></div>
+  </section>
+
+  <section class="panel" id="p-board" role="tabpanel" aria-labelledby="t-board" hidden>
+    <div class="ph"><div><div class="eyebrow">PRODUCTION</div><h2>取り置き・製造ボード</h2><p>承認済みの取り置き・団体注文だけが並びます。ボタンで次の工程へ。</p></div></div>
+    <aside class="hint"><h3>💡 この画面でAIに頼むと良いこと</h3><ul><li>「受取日ごとの個数から、明日の仕込み量と焼成スケジュールを作って」</li><li>「受渡準備OKのお客様へ送る『ご用意できました』メールを作って」</li><li>「製造上限2,400個を超えそうな日があれば警告して」</li></ul></aside>
+    <h3 class="sec">受取日ごとの合計個数</h3>
+    <div class="totals" id="totals"></div>
+    <div class="kanban" id="kanban"></div>
+  </section>
+
+  <section class="panel" id="p-settings" role="tabpanel" aria-labelledby="t-settings" hidden>
+    <div class="ph"><div><div class="eyebrow">SETTINGS</div><h2>設定・図解</h2><p>AI判定のしきい値と、仕組みの全体像。</p></div></div>
+    <aside class="hint"><h3>💡 この画面でAIに頼むと良いこと</h3><ul><li>「直近の判定結果から、自動OKのしきい値は何点が妥当か提案して」</li><li>「この図をもとに、新人スタッフ向けの1枚マニュアルを作って」</li></ul></aside>
+    <div class="grid g2s">
+      <div class="card"><h3>判定のしきい値<small>変更すると全件を再判定</small></h3>
+        <div class="sl"><label for="sAuto">自動OK（この点数以上）<output id="oAuto"></output></label><input type="range" id="sAuto" min="55" max="100" step="1"></div>
+        <div class="sl"><label for="sReview">人が確認（この点数以上）<output id="oReview"></output></label><input type="range" id="sReview" min="10" max="95" step="1"></div>
+        <div class="preview" id="preview" aria-live="polite"></div>
+      </div>
+      <div class="card"><h3>採点ルール（モックAI）<small>基本点 45点から加減点</small></h3>
+        <ul class="reasons">
+          <li><span class="pt p">+15</span>メール・電話の両方あり（片方のみ +5／なし −25）</li>
+          <li><span class="pt p">+10</span>受取日・個数が明確（各／未指定は各 −10）</li>
+          <li><span class="pt p">+10</span>大口注文 50〜500個（501個以上は −10）</li>
+          <li><span class="pt p">+10</span>40文字以上の具体的な本文（15文字未満は −15）</li>
+          <li><span class="pt p">+5</span>お名前あり・丁寧な文面</li>
+          <li><span class="pt m">−25</span>本文にURL</li>
+          <li><span class="pt m">−30</span>「当選」「稼げる」「SEO」などの迷惑語</li>
+        </ul>
+      </div>
+    </div>
+    <h3 class="sec">システム全体図</h3>
+    <figure class="diagram" id="diagram" style="margin-top:0">
+<svg viewBox="0 0 1200 470" role="img" aria-labelledby="dgT dgD" xmlns="http://www.w3.org/2000/svg">
+<title id="dgT">東京かさね菓子店 受付システムの全体図</title>
+<desc id="dgD">ホームページの問い合わせフォームから localStorage の kasane.inquiries に保存され、管理画面でAIがスコア判定し3段階に振り分け、人の承認ゲートを通ったものだけが製造ボードや返信に進み、完了する流れ。</desc>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#B0472E"/></marker></defs>
+<rect width="1200" height="470" fill="#FAF7F3"/>
+<text x="40" y="48" class="dg-l">① 受け付けて、AIが仕分ける</text>
+<text x="880" y="270" class="dg-l">② 人が決めて、実行する</text>
+<g>
+<rect x="40" y="70" width="230" height="140" rx="20" fill="#fff" stroke="#ECE4DB"/>
+<circle cx="70" cy="100" r="14" fill="#E2B04F"/><text x="70" y="105" text-anchor="middle" class="dg-n">1</text>
+<text x="60" y="148" class="dg-t">HP の問い合わせ</text><text x="60" y="174" class="dg-t">フォーム</text><text x="60" y="198" class="dg-m">index.html</text>
+</g>
+<line x1="272" y1="140" x2="318" y2="140" stroke="#B0472E" stroke-width="1.5" marker-end="url(#ar)"/>
+<g>
+<rect x="320" y="70" width="230" height="140" rx="20" fill="#fff" stroke="#ECE4DB"/>
+<circle cx="350" cy="100" r="14" fill="#E2B04F"/><text x="350" y="105" text-anchor="middle" class="dg-n">2</text>
+<text x="340" y="148" class="dg-t">localStorage</text><text x="340" y="174" class="dg-m">kasane.inquiries</text><text x="340" y="198" class="dg-s">ブラウザ内に保存</text>
+</g>
+<line x1="552" y1="140" x2="598" y2="140" stroke="#B0472E" stroke-width="1.5" marker-end="url(#ar)"/>
+<g>
+<rect x="600" y="70" width="230" height="140" rx="20" fill="#fff" stroke="#ECE4DB"/>
+<circle cx="630" cy="100" r="14" fill="#E2B04F"/><text x="630" y="105" text-anchor="middle" class="dg-n">3</text>
+<text x="620" y="148" class="dg-t">管理画面</text><text x="620" y="174" class="dg-t">AIスコア判定</text><text x="620" y="198" class="dg-s">0〜100点・理由つき</text>
+</g>
+<line x1="832" y1="140" x2="878" y2="140" stroke="#B0472E" stroke-width="1.5" marker-end="url(#ar)"/>
+<g>
+<rect x="880" y="70" width="280" height="140" rx="20" fill="#fff" stroke="#ECE4DB"/>
+<circle cx="910" cy="100" r="14" fill="#E2B04F"/><text x="910" y="105" text-anchor="middle" class="dg-n">4</text>
+<text x="934" y="107" class="dg-t">3段階振り分け</text>
+<rect x="896" y="128" width="248" height="22" rx="11" fill="#E8F3EB"/><text x="910" y="144" class="dg-s" style="fill:#3E8A57;font-weight:700">自動OK　80点〜（返信を下書き）</text>
+<rect x="896" y="154" width="248" height="22" rx="11" fill="#FBF3E1"/><text x="910" y="170" class="dg-s" style="fill:#86601A;font-weight:700">人が確認　50〜79点</text>
+<rect x="896" y="180" width="248" height="22" rx="11" fill="#F2EFEC"/><text x="910" y="196" class="dg-s" style="font-weight:700">却下　〜49点（スパム疑い）</text>
+</g>
+<line x1="1020" y1="212" x2="1020" y2="288" stroke="#B0472E" stroke-width="1.5" marker-end="url(#ar)"/>
+<g>
+<rect x="880" y="290" width="280" height="120" rx="20" fill="#F8ECE8" stroke="#B0472E" stroke-width="1.5"/>
+<circle cx="910" cy="320" r="14" fill="#B0472E"/><text x="910" y="325" text-anchor="middle" class="dg-n" style="fill:#fff">5</text>
+<text x="934" y="327" class="dg-t">人の承認ゲート</text>
+<text x="900" y="362" class="dg-s">承認／差し戻し／却下</text><text x="900" y="388" class="dg-s">必ず専用画面でコメントつき</text>
+</g>
+<line x1="878" y1="350" x2="832" y2="350" stroke="#B0472E" stroke-width="1.5" marker-end="url(#ar)"/>
+<g>
+<rect x="600" y="290" width="230" height="120" rx="20" fill="#fff" stroke="#ECE4DB"/>
+<circle cx="630" cy="320" r="14" fill="#E2B04F"/><text x="630" y="325" text-anchor="middle" class="dg-n">6</text>
+<text x="654" y="327" class="dg-t">製造ボード／返信</text>
+<text x="620" y="362" class="dg-s">対応中→製造中</text><text x="620" y="388" class="dg-s">→受渡準備OK</text>
+</g>
+<line x1="598" y1="350" x2="552" y2="350" stroke="#B0472E" stroke-width="1.5" marker-end="url(#ar)"/>
+<g>
+<rect x="320" y="290" width="230" height="120" rx="20" fill="#fff" stroke="#ECE4DB"/>
+<circle cx="350" cy="320" r="14" fill="#3E8A57"/><text x="350" y="325" text-anchor="middle" class="dg-n" style="fill:#fff">7</text>
+<text x="374" y="327" class="dg-t">完了</text>
+<text x="340" y="362" class="dg-s">お渡し・返信送信</text><text x="340" y="388" class="dg-s">履歴はすべて保存</text>
+</g>
+<g>
+<rect x="40" y="290" width="230" height="120" rx="20" fill="none" stroke="#B0472E" stroke-dasharray="6 6"/>
+<text x="60" y="330" class="dg-t">操作の記録</text><text x="60" y="360" class="dg-m">kasane.auditLog</text><text x="60" y="388" class="dg-s">誰が・いつ・何を</text>
+</g>
+<path d="M1020 412 V444 H155 V414" fill="none" stroke="#B0472E" stroke-width="1.2" stroke-dasharray="5 6" marker-end="url(#ar)"/>
+<text x="600" y="438" text-anchor="middle" class="dg-s">承認・差し戻し・却下・工程の移動を時刻つきで記録</text>
+</svg>
+    </figure>
+    <div class="grid g2s">
+      <div class="card"><h3>保存データ（localStorage）<small>キーは kasane. で統一</small></h3><div class="tbl"><table><thead><tr><th>キー</th><th>書く側</th><th>中身</th><th>件数</th></tr></thead><tbody id="keys"></tbody></table></div></div>
+      <div class="card"><h3>データの初期化</h3><p class="muted">デモ用のサンプル12件に戻します。ホームページから届いたお問い合わせと操作履歴も消えます（お気に入り・テーマは残ります）。</p><button class="btn btn-dark" id="reset" type="button">サンプルデータに戻す</button></div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+const K = {inq:'kasane.inquiries', settings:'kasane.settings', log:'kasane.auditLog', seeded:'kasane.seeded', fav:'kasane.favorites', theme:'kasane.theme'};
+const DEF = {autoOk:80, review:50};
+const STAGE = {pending:'承認待ち', returned:'差し戻し', active:'対応中', making:'製造中', ready:'受渡準備OK', done:'完了', rejected:'却下'};
+const TIER = {auto:'自動OK', review:'人が確認', reject:'却下'};
+const TCOL = {auto:'#3E8A57', review:'#E2B04F', reject:'#9A918A'};
+const BOARD_CATS = ['取り置き予約', '団体・法人注文'];
+const ME = '店長（あなた）';
+const S = {inq:[], log:[], settings:{...DEF}, tab:'dash', filter:'all', q:'', sel:null};
+
+/* ---------- storage (always guarded) ---------- */
+function rd(k, fb){ try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch(e){ return fb; } }
+function wr(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ toast('ブラウザに保存できませんでした'); return false; } }
+function rm(k){ try { localStorage.removeItem(k); } catch(e){} }
+function rawLen(k){ try { const v = localStorage.getItem(k); if (v == null) return null; try { return JSON.parse(v); } catch(e){ return v; } } catch(e){ return null; } }
+
+/* ---------- safe DOM helpers (text only via text nodes) ---------- */
+function h(tag, props, ...kids){
+  const e = document.createElement(tag);
+  if (props) for (const [k, v] of Object.entries(props)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k === 'text') e.textContent = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat()) { if (c == null || c === false) continue; e.append(c instanceof Node ? c : document.createTextNode(String(c))); }
+  return e;
+}
+const NS = 'http://www.w3.org/2000/svg';
+function sv(tag, attrs, text){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; }
+const clear = el => { while (el.firstChild) el.removeChild(el.firstChild); return el; };
+const $ = id => document.getElementById(id);
+
+/* ---------- dates ---------- */
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const todayStr = () => ymd(new Date());
+const WD = '日月火水木金土';
+function jDate(s){ if (!s) return '未指定'; const [y,m,d] = String(s).split('-').map(Number); if (!y || !m || !d) return String(s); return `${m}/${d}（${WD[new Date(y,m-1,d).getDay()]}）`; }
+function jTime(iso){ const d = new Date(iso); return isNaN(d) ? '' : `${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function ago(iso){ const m = Math.round((Date.now() - new Date(iso)) / 60000); if (isNaN(m)) return ''; if (m < 1) return 'たった今'; if (m < 60) return m + '分前'; if (m < 1440) return Math.floor(m/60) + '時間前'; return Math.floor(m/1440) + '日前'; }
+
+/* ---------- mock AI scoring (transparent rules) ---------- */
+const SPAM = /(当選|稼げる|副業|今すぐクリック|無料で公開|必ず1位|SEO|casino|bitcoin|仮想通貨|出会い)/i;
+const URLR = /(https?:\/\/|www\.)/i;
+const POLITE = /(お願い(いた)?します|ございます|恐れ入り|幸いです|ご検討|よろしく)/;
+function scoreOf(it){
+  const r = []; let s = 45; const add = (d, t) => { r.push({d, t}); s += d; };
+  const msg = String(it.message || ''), email = String(it.email || '').trim(), tel = String(it.tel || '').trim();
+  const eOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), tOk = /\d{2,4}-?\d{2,4}-?\d{3,4}/.test(tel);
+  if (String(it.name || '').trim().length >= 2) add(5, 'お名前の記入あり'); else add(-10, 'お名前が未記入');
+  if (eOk && tOk) add(15, 'メール・電話の両方あり（連絡が確実）');
+  else if (eOk || tOk) add(5, '連絡先が1つあり');
+  else add(-25, '連絡先が確認できない');
+  if (email && !eOk) add(-10, 'メールアドレスの形式が正しくない');
+  if (BOARD_CATS.includes(it.category)) {
+    if (!it.pickupDate) add(-10, '受取日が未指定');
+    else if (it.pickupDate < todayStr()) add(-15, '受取日が過去の日付');
+    else add(10, `受取日が明確（${jDate(it.pickupDate)}）`);
+    const q = Number(it.qty) || 0;
+    if (q > 0) add(10, `個数が明確（${q}個）`); else add(-10, '個数が未指定');
+    if (q >= 50 && q <= 500) add(10, '大口注文（売上見込み大）');
+    if (q > 500) add(-10, '1日の製造上限に響く可能性');
+  }
+  if (msg.length >= 40) add(10, `具体的な本文（${msg.length}文字）`);
+  else if (msg.length < 15) add(-15, `本文が短すぎる（${msg.length}文字）`);
+  if (POLITE.test(msg)) add(5, '丁寧な文面');
+  if (URLR.test(msg)) add(-25, '本文にURLを含む（迷惑メールの典型）');
+  if (SPAM.test(msg)) add(-30, '迷惑メール特有の語句を検出');
+  return {score: Math.max(0, Math.min(100, s)), reasons: r};
+}
+const tierOf = s => s >= S.settings.autoOk ? 'auto' : s >= S.settings.review ? 'review' : 'reject';
+
+function prep(it){
+  if (!Array.isArray(it.history)) it.history = [];
+  it.qty = Number(it.qty) || 0;
+  if (typeof it.score === 'number') { it.tier = tierOf(it.score); if (!STAGE[it.stage]) it.stage = 'pending'; if (!Array.isArray(it.scoreReasons)) it.scoreReasons = []; return false; }
+  const {score, reasons} = scoreOf(it);
+  Object.assign(it, {score, scoreReasons: reasons, tier: tierOf(score)});
+  if (!STAGE[it.stage]) it.stage = 'pending';
+  it.status = it.stage;
+  const web = it.source === 'web';
+  it.history.push({at: it.createdAt || new Date().toISOString(), who: web ? 'ホームページ' : 'システム', text: '受付（' + (web ? 'HPフォーム' : '手入力') + '）'});
+  it.history.push({at: new Date().toISOString(), who: 'AI', text: `AI判定：${score}点 → ${TIER[it.tier]}`});
+  it.history.push({at: new Date().toISOString(), who: 'システム', text: '承認待ちへ（人の確認が必要）'});
+  return true;
+}
+
+function ingest(){
+  let arr = rd(K.inq, []);
+  if (!Array.isArray(arr)) arr = [];
+  arr = arr.filter(x => x && typeof x === 'object');
+  let n = 0;
+  arr.forEach((it, i) => { if (!it.id) it.id = 'INQ-' + Date.now() + '-' + i; if (!it.createdAt) it.createdAt = new Date().toISOString(); if (prep(it)) n++; });
+  S.inq = arr;
+  if (n) wr(K.inq, arr);
+  return n;
+}
+function persist(){
+  const cur = rd(K.inq, []);
+  if (Array.isArray(cur)) {
+    const ids = new Set(S.inq.map(i => i.id)); let n = 0;
+    cur.filter(x => x && x.id && !ids.has(x.id)).forEach(x => { if (prep(x)) n++; S.inq.push(x); });
+    if (n) notifyNew(n);
+  }
+  S.inq.forEach(i => { i.status = i.stage; });
+  wr(K.inq, S.inq);
+}
+function log(action, it, comment, from, to){
+  S.log.unshift({at: new Date().toISOString(), action, inquiryId: it ? it.id : '', name: it ? it.name : '', from: from || '', to: to || '', comment: comment || '', actor: ME});
+  S.log = S.log.slice(0, 300);
+  wr(K.log, S.log);
+}
+
+/* ---------- sample data ---------- */
+function seed(){
+  const now = Date.now(), D = n => { const d = new Date(); d.setDate(d.getDate() + n); return ymd(d); };
+  const R = [
+    [32, '取り置き予約', '佐藤 美咲', 'misaki.sato@example.jp', '090-1234-5678', 0, 12, 'いつも楽しみにしております。本日15時ごろに伺いたいので、かさねミルフィーユを12個お取り置きをお願いいたします。手提げ袋を2枚いただけますと助かります。', 'pending'],
+    [85, '団体・法人注文', '株式会社みなと商事 総務部 高橋 健一', 'k.takahashi@minato-shoji.example.co.jp', '03-5555-0123', 3, 120, '来週の取引先向け説明会で手土産として使用したく、120個をご相談させていただけますでしょうか。領収書（宛名：株式会社みなと商事）と、のし対応の可否もご教示いただけますと幸いです。', 'active'],
+    [130, '取り置き予約', '田中 ひろし', '', '080-2222-3434', 1, 0, '明日の夕方に伺います。何個か取っておいてもらえますか？', 'pending'],
+    [190, '商品について', '山本 さくら', 'sakura.y@example.com', '', null, 0, '卵アレルギーがあるのですが、かさねミルフィーユに卵は使われていますか？ 原材料の一覧を確認できる方法があれば教えてください。よろしくお願いいたします。', 'pending'],
+    [300, '取材・コラボ', '月刊スイーツ散歩 編集部 中村 玲奈', 'nakamura@sweets-sanpo.example.jp', '03-6666-7788', null, 0, '12月号の「東京駅の行列スイーツ」特集で、貴店を取材させていただきたくご連絡いたしました。撮影は30分程度、開店前の7:30ごろを希望しております。ご検討のほどよろしくお願いいたします。', 'pending'],
+    [360, 'その他', 'Lucky Win 事務局', 'win@promo-cash.example', '', null, 0, '【当選】おめでとうございます！今すぐクリック→ http://bit.example/xxxx 副業で月100万円稼げる方法を無料で公開中！', 'pending'],
+    [1300, '取り置き予約', '鈴木 大輔', 'd.suzuki@example.ne.jp', '070-3333-1212', 2, 6, '子どもの誕生日に使いたいです。明後日の夕方18時ごろに6個お願いします。', 'making'],
+    [1500, '団体・法人注文', '伊藤 由美子（八重洲町内会）', 'yumiko.ito@example.org', '', null, 300, '町内会の秋祭りで300個を検討しています。予算の目安と、2回に分けての受け取りが可能か教えてください。日程は来月の予定です。', 'pending'],
+    [1620, 'その他', 'SEO対策のご案内', 'info@seo-rank.example', '', null, 0, '貴社サイトの検索順位を必ず1位にします。詳細は https://seo-rank.example をクリック', 'rejected'],
+    [18, '取り置き予約', '小林 直樹', 'naoki.k@example.jp', '080-4444-5656', 0, 4, '本日19時に4個受け取りに伺います。よろしくお願いいたします。', 'ready'],
+    [240, '商品について', '渡辺 あや', 'aya.w@example.jp', '', null, 0, 'かさねミルフィーユの賞味期限は何日ですか？', 'pending'],
+    [2900, '取り置き予約', '加藤 雅人', 'm.kato@example.jp', '090-5555-8080', -1, 10, '会社の打ち合わせ用に、10個のお取り置きをお願いいたします。15時ごろ受け取りに伺います。領収書もお願いできますでしょうか。', 'done']
+  ];
+  const PATH = {active:['approve'], making:['approve','making'], ready:['approve','making','ready'], done:['approve','making','ready','done'], rejected:['reject']};
+  const LBL = {approve:['承認','active'], making:['製造開始','making'], ready:['受渡準備OK','ready'], done:['完了','done'], reject:['却下','rejected']};
+  const logs = [];
+  const items = R.map((r, i) => {
+    const at = new Date(now - r[0] * 60000);
+    const it = {id: `INQ-${ymd(at).replace(/-/g,'')}-${pad(at.getHours())}${pad(at.getMinutes())}-${1000 + (i * 7919) % 9000}`, createdAt: at.toISOString(), source: 'web', category: r[1], name: r[2], email: r[3], tel: r[4], pickupDate: r[5] == null ? '' : D(r[5]), qty: r[6], message: r[7], status: 'new'};
+    prep(it);
+    it.history[1].at = it.history[2].at = new Date(at.getTime() + 40000).toISOString();
+    let t = at.getTime() + 40000, from = '承認待ち';
+    (PATH[r[8]] || []).forEach((step, k) => {
+      t = Math.min(t + (k ? 90 : 12) * 60000, now - 60000 * (5 - k));
+      const [label, st] = LBL[step], iso = new Date(t).toISOString(), c = step === 'approve' ? 'AI判定どおりで問題なし' : step === 'reject' ? '迷惑メールのため' : '';
+      it.history.push({at: iso, who: ME, text: `${label}：${from} → ${STAGE[st]}`, comment: c});
+      logs.push({at: iso, action: label, inquiryId: it.id, name: it.name, from, to: STAGE[st], comment: c, actor: ME});
+      from = STAGE[st];
+    });
+    it.stage = r[8]; it.status = r[8];
+    return it;
+  });
+  logs.sort((a, b) => b.at.localeCompare(a.at));
+  return {items, logs};
+}
+function applySeed(keepExisting){
+  const {items, logs} = seed();
+  let ex = keepExisting ? rd(K.inq, []) : [];
+  if (!Array.isArray(ex)) ex = [];
+  wr(K.inq, items.concat(ex.filter(x => x && typeof x === 'object')));
+  const oldLog = keepExisting ? rd(K.log, []) : [];
+  S.log = logs.concat(Array.isArray(oldLog) ? oldLog : []);
+  wr(K.log, S.log);
+  wr(K.seeded, true);
+}
+
+/* ---------- UI bits ---------- */
+let toastT;
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3600); }
+function notifyNew(n){ toast(`ホームページから新しいお問い合わせが届きました（${n}件）`); }
+function ring(score, tier, size){
+  const r = size / 2 - 5, c = 2 * Math.PI * r, g = sv('svg', {class: 'ring', width: size, height: size, viewBox: `0 0 ${size} ${size}`, role: 'img', 'aria-label': `AIスコア ${score}点`});
+  g.append(sv('circle', {cx: size/2, cy: size/2, r, fill: 'none', stroke: '#ECE4DB', 'stroke-width': size > 60 ? 7 : 5}));
+  g.append(sv('circle', {cx: size/2, cy: size/2, r, fill: 'none', stroke: TCOL[tier], 'stroke-width': size > 60 ? 7 : 5, 'stroke-linecap': 'round', 'stroke-dasharray': `${c * score / 100} ${c}`, transform: `rotate(-90 ${size/2} ${size/2})`}));
+  g.append(sv('text', {x: size/2, y: size/2 + (size > 60 ? 10 : 6), 'text-anchor': 'middle', 'font-size': size > 60 ? 28 : 17, fill: '#2B2420'}, score));
+  return g;
+}
+const tierBadge = t => h('span', {class: 'tier t-' + t}, TIER[t]);
+function hl(text, q){
+  const f = document.createDocumentFragment(), s = String(text || '');
+  if (!q) { f.append(s); return f; }
+  const low = s.toLowerCase(), ql = q.toLowerCase(); let i = 0, j;
+  while ((j = low.indexOf(ql, i)) > -1) { f.append(s.slice(i, j), h('mark', null, s.slice(j, j + q.length))); i = j + q.length; }
+  f.append(s.slice(i)); return f;
+}
+const byId = id => S.inq.find(i => i.id === id);
+
+/* ---------- modal (never window.confirm/alert/prompt) ---------- */
+function modal({title, lead, item, confirm, kind, comment = true, onOk}){
+  const prev = document.activeElement;
+  const ta = comment ? h('textarea', {id: 'mComment', rows: '3', placeholder: '例：在庫確認済み／のし対応OK'}) : null;
+  const ok = h('button', {class: 'btn ' + (kind === 'danger' ? 'btn-dark' : 'btn-primary'), id: 'mOk', type: 'button'}, confirm);
+  const cancel = h('button', {class: 'btn btn-ghost', type: 'button'}, 'キャンセル');
+  const box = h('div', {class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'mTitle'},
+    h('h3', {id: 'mTitle'}, title), lead && h('p', {class: 'mlead'}, lead),
+    item && h('div', {class: 'msum'}, h('strong', null, item.name || '（お名前なし）'), ' ／ ', item.category || '', ' ／ AI ', String(item.score), '点 ', tierBadge(item.tier)),
+    ta && h('label', {for: 'mComment'}, 'コメント（任意・操作履歴に残ります）'), ta,
+    h('div', {class: 'mact'}, cancel, ok));
+  const bd = h('div', {class: 'backdrop'}, box);
+  const close = () => { document.removeEventListener('keydown', key); bd.remove(); if (prev && prev.focus) prev.focus(); };
+  function key(e){
+    if (e.key === 'Escape') close();
+    if (e.key === 'Tab') { const f = [...box.querySelectorAll('button,textarea')]; const a = f[0], z = f[f.length-1];
+      if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); } else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); } }
+  }
+  cancel.addEventListener('click', close);
+  ok.addEventListener('click', () => { const c = ta ? ta.value.trim() : ''; close(); onOk(c); });
+  bd.addEventListener('click', e => { if (e.target === bd) close(); });
+  document.addEventListener('keydown', key);
+  document.body.append(bd);
+  requestAnimationFrame(() => bd.classList.add('in'));
+  (ta || ok).focus();
+}
+const ACT = {
+  approve: {title: '承認して「対応中」へ進めます', confirm: '承認する', kind: 'primary', stage: 'active', label: '承認', lead: '取り置き・団体注文は製造ボードへ、その他は返信待ちとして対応中に入ります。'},
+  sendback: {title: '差し戻します', confirm: '差し戻す', stage: 'returned', label: '差し戻し', lead: 'お客様への追加確認が必要なときに。「再審査へ戻す」まで保留になります。'},
+  reject: {title: '却下します', confirm: '却下する', kind: 'danger', stage: 'rejected', label: '却下', lead: '迷惑メール・対応不可などの場合に。データと履歴は残ります。'}
+};
+function move(it, stage, label, comment){
+  const from = STAGE[it.stage];
+  it.stage = stage;
+  it.history.push({at: new Date().toISOString(), who: ME, text: `${label}：${from} → ${STAGE[stage]}`, comment: comment || ''});
+  log(label, it, comment, from, STAGE[stage]);
+  persist(); renderAll();
+}
+function ask(it, a){ const d = ACT[a]; modal({...d, item: it, onOk: c => { move(it, d.stage, d.label, c); toast(`「${it.name || 'お問い合わせ'}」を${d.label}しました`); }}); }
+
+/* ---------- tabs ---------- */
+function showTab(name){
+  if (!$('p-' + name)) name = 'dash';
+  S.tab = name;
+  document.querySelectorAll('.tab').forEach(t => { const on = t.dataset.tab === name; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; });
+  document.querySelectorAll('.panel').forEach(p => { const on = p.id === 'p-' + name; p.hidden = !on; p.classList.remove('fade'); if (on) { void p.offsetWidth; p.classList.add('fade'); } });
+  if (scrollY > 200) scrollTo(0, 0);
+  try { history.replaceState(null, '', '#' + name); } catch(e){}
+}
+
+/* ---------- dashboard ---------- */
+function renderDash(){
+  const t = todayStr(), all = S.inq, nowD = new Date();
+  $('dashDate').textContent = `${nowD.getFullYear()}年${nowD.getMonth()+1}月${nowD.getDate()}日（${WD[nowD.getDay()]}）・営業 8:00〜22:00`;
+  const todays = all.filter(i => ymd(new Date(i.createdAt)) === t);
+  const pend = all.filter(i => i.stage === 'pending');
+  const autoN = all.filter(i => i.tier === 'auto').length;
+  const rate = all.length ? Math.round(autoN / all.length * 100) : 0;
+  const pieces = all.filter(i => BOARD_CATS.includes(i.category) && i.pickupDate === t && i.stage !== 'rejected').reduce((a, i) => a + i.qty, 0);
+  const web = todays.filter(i => i.source === 'web').length;
+  const K4 = [
+    ['今日の問い合わせ', todays.length, '件', `うちHPフォーム経由 ${web}件`, false],
+    ['承認待ち', pend.length, '件', `自動OK推奨 ${pend.filter(i => i.tier === 'auto').length}件 → 承認ゲートへ`, pend.length > 0, 'gate'],
+    ['自動OK率', rate, '%', `全${all.length}件中 ${autoN}件がAIだけで判断可能`, false],
+    ['今日の取り置き個数', pieces, '個', '本日受取・却下を除く', false, 'board']
+  ];
+  const box = clear($('kpis'));
+  K4.forEach(([lb, v, u, ft, hot, go]) => box.append(h('div', {class: 'card kpi' + (hot ? ' hot' : ''), style: go ? 'cursor:pointer' : null, onclick: go ? () => showTab(go) : null}, h('div', {class: 'lb'}, lb), h('div', {class: 'v'}, String(v), h('small', null, u)), h('div', {class: 'ft'}, ft))));
+  const grp = all.filter(i => i.category === '団体・法人注文' && i.stage === 'pending').length;
+  $('brief').textContent = `おはようございます。承認待ちが${pend.length}件あります。うち${pend.filter(i => i.tier === 'auto').length}件はAIの自動OK推奨なので、まとめて確認できます。` + (grp ? `団体・法人注文${grp}件は製造計画に影響するため、先に判断をおすすめします。` : '') + ` 本日の取り置きは${pieces}個です。`;
+  renderChart();
+  const c = {auto: 0, review: 0, reject: 0}; all.forEach(i => c[i.tier]++);
+  $('tierTotal').textContent = `全${all.length}件`;
+  const st = clear($('stack')), lg = clear($('legend'));
+  ['auto', 'review', 'reject'].forEach(k => {
+    const p = all.length ? c[k] / all.length * 100 : 0;
+    st.append(h('span', {style: `width:${p}%;background:${TCOL[k]}`, title: `${TIER[k]} ${c[k]}件`}));
+    lg.append(h('li', null, h('span', {class: 'dot', style: 'background:' + TCOL[k]}), TIER[k], h('span', {class: 'small muted'}, k === 'auto' ? `${S.settings.autoOk}点以上` : k === 'review' ? `${S.settings.review}〜${S.settings.autoOk-1}点` : `${S.settings.review-1}点以下`), h('span', {class: 'n'}, `${c[k]}件（${Math.round(p)}%）`)));
+  });
+  logList($('dashLog'), 6);
+}
+function logList(ul, n){
+  clear(ul);
+  if (!S.log.length) { ul.append(h('li', {class: 'muted'}, 'まだ操作履歴はありません')); return; }
+  S.log.slice(0, n).forEach(l => ul.append(h('li', null, h('time', null, jTime(l.at)),
+    h('span', null, h('strong', null, l.action), ' ', l.name || '', l.to ? h('span', {class: 'muted small'}, `　${l.from} → ${l.to}`) : ''),
+    l.comment ? h('span', {class: 'c'}, '「' + l.comment + '」') : null)));
+}
+function renderChart(){
+  const W = 700, H = 280, L = 40, B = 40, T = 24, hours = []; for (let x = 8; x < 22; x++) hours.push(x);
+  const base = [14, 22, 31, 26, 44, 48, 35, 24, 27, 38, 52, 46, 30, 18], day = new Date().getDate();
+  const vals = base.map((v, i) => Math.max(5, v + ((day * 7 + i * 13) % 9) - 4));
+  const max = 60, bw = (W - L - 8) / hours.length, nowH = new Date().getHours();
+  const g = sv('svg', {viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': '時間帯別の行列待ち時間の予測'});
+  [0, 20, 40, 60].forEach(v => { const y = H - B - (H - B - T) * v / max; g.append(sv('line', {x1: L, x2: W, y1: y, y2: y, stroke: '#ECE4DB'})); g.append(sv('text', {x: L - 8, y: y + 5, 'text-anchor': 'end', 'font-size': 13, fill: '#6F655D'}, v)); });
+  const pk = vals.indexOf(Math.max(...vals));
+  hours.forEach((hr, i) => {
+    const bh = (H - B - T) * vals[i] / max, x = L + 4 + i * bw, y = H - B - bh, cur = hr === nowH;
+    const r = sv('rect', {x: x + 4, y, width: bw - 8, height: bh, rx: 6, fill: cur ? '#B0472E' : (i === pk ? '#E2B04F' : '#F1D9A4')});
+    r.append(sv('title', {}, `${hr}時台 約${vals[i]}分待ち`)); g.append(r);
+    if (cur || i === pk) g.append(sv('text', {x: x + bw/2, y: y - 6, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 700, fill: cur ? '#B0472E' : '#86601A'}, vals[i] + '分'));
+    g.append(sv('text', {x: x + bw/2, y: H - B + 20, 'text-anchor': 'middle', 'font-size': 13, fill: cur ? '#B0472E' : '#6F655D', 'font-weight': cur ? 700 : 400}, hr));
+  });
+  g.append(sv('text', {x: W, y: H - 4, 'text-anchor': 'end', 'font-size': 13, fill: '#6F655D'}, `時（ピーク予測 ${hours[pk]}時台・赤は現在）`));
+  clear($('chart')).append(g);
+}
+
+/* ---------- inbox ---------- */
+function filtered(){
+  const q = S.q.trim().toLowerCase();
+  return S.inq.filter(i => (S.filter === 'all' || i.tier === S.filter) && (!q || [i.name, i.email, i.tel, i.message, i.category, i.id].join(' ').toLowerCase().includes(q)))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+function renderInbox(){
+  const cnt = {all: S.inq.length, auto: 0, review: 0, reject: 0}; S.inq.forEach(i => cnt[i.tier]++);
+  const ch = clear($('chips'));
+  [['all', 'すべて'], ['auto', '自動OK'], ['review', '人が確認'], ['reject', '却下']].forEach(([k, l]) =>
+    ch.append(h('button', {class: 'chip', type: 'button', 'aria-pressed': S.filter === k, onclick: () => { S.filter = k; renderInbox(); }}, l, h('b', null, String(cnt[k])))));
+  const list = clear($('list')), rows = filtered(), q = S.q.trim();
+  if (!rows.length) list.append(h('div', {class: 'empty'}, '該当するお問い合わせはありません'));
+  rows.forEach(it => list.append(h('button', {class: 'item', type: 'button', 'aria-current': S.sel === it.id, onclick: () => { S.sel = it.id; renderInbox(); if (innerWidth <= 1000) $('detail').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); }},
+    ring(it.score, it.tier, 52),
+    h('span', {style: 'min-width:0'},
+      h('span', {class: 'row'}, h('span', {class: 'nm'}, hl(it.name || '（お名前なし）', q)), h('span', {class: 'tm'}, ago(it.createdAt))),
+      h('span', {class: 'sn'}, hl(it.message, q)),
+      h('span', {class: 'meta'}, tierBadge(it.tier), h('span', {class: 'tag'}, it.category || 'その他'), h('span', {class: 'tag stage'}, STAGE[it.stage]))))));
+  const n = S.inq.filter(i => i.stage === 'pending' && i.tier !== 'reject').length;
+  $('c-inbox').textContent = n ? String(n) : '';
+  renderDetail();
+}
+function draft(it){
+  const nm = String(it.name || 'お客').trim();
+  if (it.tier === 'reject' && (URLR.test(it.message) || SPAM.test(it.message))) return '（AI判定：迷惑メールの可能性が高いため、返信は不要です）\n\n念のため内容をご確認のうえ、承認ゲートで「却下」してください。';
+  const L = [`${nm} 様`, '', 'このたびは東京かさね菓子店にお問い合わせいただき、誠にありがとうございます。', ''];
+  const need = [];
+  if (BOARD_CATS.includes(it.category)) { if (!it.pickupDate) need.push('・お受け取り希望日と時間帯'); if (!it.qty) need.push('・ご希望の個数'); if (!it.tel) need.push('・当日つながるお電話番号'); }
+  switch (it.category) {
+    case '取り置き予約':
+      if (!need.length) L.push(`${jDate(it.pickupDate)}に「かさねミルフィーユ」${it.qty}個のお取り置きを承りました。`, 'お受け取りは東京駅 改札内1F「赤れんが通り」店舗にて、8:00〜22:00の間にお越しください。', '行列とは別の「お取り置き受取口」でお名前をお伝えいただければ、すぐにお渡しいたします。');
+      else L.push('お取り置きのご希望、承知いたしました。確実にご用意するため、恐れ入りますが以下をお知らせください。');
+      break;
+    case '団体・法人注文':
+      L.push(`${it.qty ? it.qty + '個の' : ''}まとまったご注文のご相談をいただき、ありがとうございます。`, '団体・法人のご注文は、受取日の3日前までの確定で承っております。のし・領収書・分割でのお受け取りにも対応いたします。');
+      if (need.length) L.push('製造枠を確保するため、恐れ入りますが以下をお知らせください。');
+      else L.push(`${jDate(it.pickupDate)}の製造枠を仮押さえいたしました。お見積りを本日中にお送りいたします。`);
+      break;
+    case '商品について':
+      L.push('お問い合わせの件、担当者が確認のうえご案内いたします。', /アレルギ|卵|乳|小麦/.test(it.message || '') ? 'かさねミルフィーユには卵・乳・小麦を使用しております。詳しい原材料表をPDFでお送りいたしますので、お手数ですが本メールにご返信ください。' : 'かさねミルフィーユの賞味期限は製造日を含め2日間です。お早めにお召し上がりください。');
+      break;
+    case '取材・コラボ':
+      L.push('取材のご依頼をいただき、光栄に存じます。', '広報担当より、撮影可能な日時（開店前 7:00〜7:45）と掲載条件について、2営業日以内にご連絡いたします。');
+      break;
+    default:
+      L.push('いただいた内容を確認し、担当より改めてご連絡いたします。');
+  }
+  if (need.length) L.push(...need);
+  L.push('', '今後とも東京かさね菓子店をよろしくお願いいたします。', '', '――――――――', '東京かさね菓子店（東京駅 改札内1F 赤れんが通り）', '営業時間 8:00〜22:00（年中無休）');
+  return L.join('\n');
+}
+function stepper(it){
+  const steps = ['受付', 'AI判定', '承認待ち', '対応中', '完了'];
+  const idx = {pending: 2, returned: 2, active: 3, making: 3, ready: 3, done: 5, rejected: -1}[it.stage];
+  const ol = h('ol', {class: 'steps', 'aria-label': '進み具合'});
+  steps.forEach((s, i) => {
+    let cls = '';
+    if (it.stage === 'rejected') cls = i < 2 ? 'done' : '';
+    else cls = i < idx ? 'done' : i === idx ? 'now' : '';
+    ol.append(h('li', {class: cls}, i === 2 && it.stage === 'returned' ? '差し戻し中' : i === 3 && ['making', 'ready'].includes(it.stage) ? STAGE[it.stage] : s));
+  });
+  if (it.stage === 'rejected') ol.append(h('li', {class: 'x'}, '却下'));
+  return ol;
+}
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); return true; } catch(e){
+    try { const t = h('textarea', {style: 'position:fixed;opacity:0'}); t.value = text; document.body.append(t); t.select(); const ok = document.execCommand('copy'); t.remove(); return ok; } catch(e2){ return false; }
+  }
+}
+function renderDetail(){
+  const d = clear($('detail')), it = byId(S.sel);
+  if (!it) { d.append(h('div', {class: 'empty'}, h('h3', {style: 'font-size:22px;margin-bottom:8px'}, '左の一覧から選んでください'), 'AIの採点理由・返信文の下書き・履歴が表示されます。')); return; }
+  d.append(h('div', {class: 'hd'},
+    h('div', {style: 'min-width:0'}, h('div', {class: 'meta', style: 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px'}, tierBadge(it.tier), h('span', {class: 'tag'}, it.category || 'その他'), h('span', {class: 'tag stage'}, STAGE[it.stage])), h('h3', null, it.name || '（お名前なし）'), h('div', {class: 'small muted'}, it.id + '　' + jTime(it.createdAt) + ' 受付')),
+    ring(it.score, it.tier, 104)));
+  const facts = h('dl', {class: 'facts'});
+  [['メール', it.email || '—'], ['電話', it.tel || '—'], ['受取日', BOARD_CATS.includes(it.category) ? jDate(it.pickupDate) : '—'], ['個数', it.qty ? it.qty + '個' : '—']].forEach(([k, v]) => facts.append(h('div', null, h('dt', null, k), h('dd', null, v))));
+  d.append(facts, h('p', {class: 'msg'}, it.message || '（本文なし）'));
+  d.append(h('h4', {class: 'sec'}, `AIの採点理由（${it.score}点 → ${TIER[it.tier]}）`));
+  const ul = h('ul', {class: 'reasons'}); ul.append(h('li', null, h('span', {class: 'pt', style: 'background:#F2EFEC'}, '45'), '基本点'));
+  (it.scoreReasons || []).forEach(r => ul.append(h('li', null, h('span', {class: 'pt ' + (r.d >= 0 ? 'p' : 'm')}, (r.d >= 0 ? '+' : '−') + Math.abs(r.d)), r.t)));
+  d.append(ul, h('h4', {class: 'sec'}, '進み具合'), stepper(it));
+  d.append(h('h4', {class: 'sec'}, 'AIが下書きした返信文'));
+  const ta = h('textarea', {class: 'reply', 'aria-label': '返信文の下書き'}); ta.value = draft(it); d.append(ta);
+  const acts = h('div', {class: 'acts'}, h('button', {class: 'btn', type: 'button', onclick: async () => toast(await copyText(ta.value) ? '返信文をコピーしました' : 'コピーできませんでした。手動で選択してください')}, '返信文をコピー'));
+  if (it.stage === 'pending') acts.append(h('button', {class: 'btn btn-primary', type: 'button', onclick: () => ask(it, 'approve')}, '承認する'), h('button', {class: 'btn', type: 'button', onclick: () => { showTab('gate'); }}, '承認ゲートで見る'));
+  if (it.stage === 'returned') acts.append(h('button', {class: 'btn btn-primary', type: 'button', onclick: () => { move(it, 'pending', '再審査へ戻す', ''); toast('承認待ちに戻しました'); }}, '再審査へ戻す'));
+  if (it.stage === 'active' && !BOARD_CATS.includes(it.category)) acts.append(h('button', {class: 'btn btn-primary', type: 'button', onclick: () => { move(it, 'done', '返信して完了', ''); toast('完了にしました'); }}, '返信送信済みにして完了'));
+  d.append(acts, h('h4', {class: 'sec'}, '履歴'));
+  const hist = h('ul', {class: 'hist'});
+  it.history.slice().reverse().forEach(x => hist.append(h('li', null, h('div', {class: 'w'}, jTime(x.at) + '　' + (x.who || '')), h('div', null, x.text || ''), x.comment ? h('div', {class: 'small muted'}, '「' + x.comment + '」') : null)));
+  d.append(hist);
+}
+
+/* ---------- gate ---------- */
+function renderGate(){
+  const order = {auto: 0, review: 1, reject: 2};
+  const pend = S.inq.filter(i => i.stage === 'pending').sort((a, b) => order[a.tier] - order[b.tier] || b.score - a.score);
+  $('c-gate').textContent = pend.length ? String(pend.length) : '';
+  const sum = clear($('gsum'));
+  sum.append(h('span', {class: 'tag stage'}, `承認待ち ${pend.length}件`));
+  ['auto', 'review', 'reject'].forEach(t => sum.append(h('span', {class: 'tier t-' + t}, `AI推奨：${TIER[t]} ${pend.filter(i => i.tier === t).length}件`)));
+  const g = clear($('gates'));
+  if (!pend.length) g.append(h('div', {class: 'card empty'}, '承認待ちはありません。おつかれさまです。'));
+  pend.forEach(it => g.append(h('article', {class: 'card gcard'},
+    h('div', {class: 'top2'}, ring(it.score, it.tier, 64), h('div', {style: 'min-width:0'}, h('h4', null, it.name || '（お名前なし）'), h('div', {class: 'rec'}, 'AI推奨 ', tierBadge(it.tier), '　', ago(it.createdAt)))),
+    h('div', {class: 'meta', style: 'display:flex;gap:6px;flex-wrap:wrap'}, h('span', {class: 'tag'}, it.category || 'その他'), BOARD_CATS.includes(it.category) ? h('span', {class: 'tag'}, `受取 ${jDate(it.pickupDate)}・${it.qty ? it.qty + '個' : '個数未定'}`) : null),
+    h('p', {class: 'ex'}, it.message || ''),
+    h('div', {class: 'small muted'}, '主な理由：' + (it.scoreReasons || []).slice().sort((a, b) => Math.abs(b.d) - Math.abs(a.d)).slice(0, 2).map(r => r.t).join('／')),
+    h('div', {class: 'acts'},
+      h('button', {class: 'btn btn-primary', type: 'button', 'data-act': 'approve', onclick: () => ask(it, 'approve')}, '承認'),
+      h('button', {class: 'btn', type: 'button', onclick: () => ask(it, 'sendback')}, '差し戻し'),
+      h('button', {class: 'btn btn-ghost', type: 'button', onclick: () => ask(it, 'reject')}, '却下'),
+      h('button', {class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => { S.sel = it.id; showTab('inbox'); renderInbox(); }}, '詳細')))));
+  const ret = S.inq.filter(i => i.stage === 'returned'), rb = clear($('returned'));
+  if (ret.length) {
+    rb.append(h('h3', {class: 'sec', style: 'margin-top:40px'}, `差し戻し中（${ret.length}件）`));
+    const gg = h('div', {class: 'grid gates'});
+    ret.forEach(it => gg.append(h('article', {class: 'card gcard'}, h('div', {class: 'top2'}, ring(it.score, it.tier, 52), h('h4', null, it.name || '（お名前なし）')),
+      h('p', {class: 'ex'}, it.message || ''), h('div', {class: 'acts'}, h('button', {class: 'btn', type: 'button', onclick: () => { move(it, 'pending', '再審査へ戻す', ''); toast('承認待ちに戻しました'); }}, '再審査へ戻す')))));
+    rb.append(gg);
+  }
+}
+
+/* ---------- board ---------- */
+function renderBoard(){
+  const cols = [['active', '対応中', 'making', '製造を開始'], ['making', '製造中', 'ready', '受渡準備OKにする'], ['ready', '受渡準備OK', 'done', 'お渡しして完了'], ['done', '完了', null, null]];
+  const items = S.inq.filter(i => BOARD_CATS.includes(i.category) && ['active', 'making', 'ready', 'done'].includes(i.stage)).sort((a, b) => String(a.pickupDate).localeCompare(String(b.pickupDate)));
+  $('c-board').textContent = items.filter(i => i.stage !== 'done').length || '';
+  const tot = {}; items.filter(i => i.stage !== 'done').forEach(i => { const k = i.pickupDate || '未定'; tot[k] = (tot[k] || 0) + i.qty; });
+  const tb = clear($('totals')), t = todayStr();
+  const keys = Object.keys(tot).sort();
+  if (!keys.length) tb.append(h('p', {class: 'muted'}, '進行中の取り置き・団体注文はありません'));
+  keys.forEach(k => tb.append(h('div', {class: 'tot' + (k === t ? ' today' : '')}, h('div', {class: 'd'}, k === '未定' ? '受取日未定' : jDate(k) + (k === t ? '・本日' : '')), h('div', {class: 'q'}, tot[k] + '個'))));
+  const kb = clear($('kanban'));
+  cols.forEach(([st, label, next, btn]) => {
+    let list = items.filter(i => i.stage === st);
+    if (st === 'done') list = list.slice(-6).reverse();
+    const col = h('section', {class: 'col', 'aria-label': label}, h('h3', null, label, h('span', {class: 'muted small'}, list.length + '件')));
+    if (!list.length) col.append(h('p', {class: 'muted small', style: 'margin:0'}, 'ここにはまだありません'));
+    list.forEach(it => col.append(h('div', {class: 'kc'},
+      h('div', {class: 'nm'}, it.name || '（お名前なし）'),
+      h('div', {class: 'small muted'}, (it.category === '団体・法人注文' ? '団体　' : '取り置き　') + '受取 ' + jDate(it.pickupDate)),
+      h('div', {class: 'q'}, it.qty + '個'),
+      next ? h('div', {class: 'acts'}, h('button', {class: 'btn btn-sm' + (st === 'ready' ? ' btn-primary' : ''), type: 'button', onclick: () => { move(it, next, btn.replace('にする', '').replace('お渡しして', ''), ''); toast(`${it.name || ''}：${STAGE[next]}へ進めました`); }}, btn + ' →')) : null)));
+    kb.append(col);
+  });
+}
+
+/* ---------- settings ---------- */
+function renderSettings(){
+  const a = S.settings.autoOk, r = S.settings.review;
+  $('sAuto').value = a; $('sReview').value = r; $('oAuto').textContent = a + '点'; $('oReview').textContent = r + '点';
+  const c = {auto: 0, review: 0, reject: 0}; S.inq.forEach(i => c[i.tier]++); const n = S.inq.length || 1;
+  const pv = clear($('preview'));
+  ['auto', 'review', 'reject'].forEach(k => pv.append(h('span', {style: `flex-basis:${c[k] / n * 100}%;background:${k === 'review' ? '#FBF3E1' : k === 'auto' ? '#E8F3EB' : '#F2EFEC'};color:${k === 'review' ? '#86601A' : TCOL[k] === '#9A918A' ? '#6F655D' : TCOL[k]}`}, c[k] ? `${TIER[k]} ${c[k]}` : '')));
+  const rows = [[K.inq, 'HP（追加）／管理画面（更新）', 'お問い合わせ・取り置き予約'], [K.fav, 'HP', 'お気に入り商品ID'], [K.theme, 'HP', '"light" / "dark"'], [K.settings, '管理画面', 'しきい値'], [K.log, '管理画面', '操作履歴'], [K.seeded, '管理画面', 'サンプル投入済みフラグ']];
+  const tb = clear($('keys'));
+  rows.forEach(([k, w, d]) => { const v = rawLen(k); const c2 = v == null ? '未作成' : Array.isArray(v) ? v.length + '件' : typeof v === 'object' ? JSON.stringify(v) : String(v);
+    tb.append(h('tr', null, h('td', null, h('code', null, k)), h('td', null, w), h('td', null, d), h('td', {style: 'white-space:nowrap'}, c2))); });
+}
+function onSlide(e){
+  let a = +$('sAuto').value, r = +$('sReview').value;
+  if (r > a - 5) { if (e.target.id === 'sAuto') r = Math.max(10, a - 5); else a = Math.min(100, r + 5); }
+  if (r > a - 5) r = a - 5;
+  S.settings = {autoOk: a, review: r};
+  wr(K.settings, S.settings);
+  S.inq.forEach(i => { const {score, reasons} = scoreOf(i); i.score = score; i.scoreReasons = reasons; i.tier = tierOf(score); });
+  persist(); renderAll();
+}
+
+/* ---------- render all ---------- */
+function renderAll(){
+  renderDash(); renderInbox(); renderGate(); renderBoard(); renderSettings();
+  const d = new Date(); $('sync').textContent = `最終同期 ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+function loadSettings(){
+  const s = rd(K.settings, null) || {};
+  const a = Number(s.autoOk), r = Number(s.review);
+  S.settings = {autoOk: a >= 55 && a <= 100 ? a : DEF.autoOk, review: r >= 10 && r < (a >= 55 && a <= 100 ? a : DEF.autoOk) ? r : DEF.review};
+}
+function loadLog(){ const l = rd(K.log, []); S.log = Array.isArray(l) ? l : []; }
+function refresh(manual){
+  loadSettings(); loadLog();
+  const n = ingest();
+  if (n) notifyNew(n); else if (manual) toast('最新の状態です（新着はありません）');
+  renderAll();
+}
+
+/* ---------- init ---------- */
+loadSettings();
+if (!rd(K.seeded, false)) applySeed(true); else loadLog();
+ingest();
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
+$('t-dash').parentElement.addEventListener('keydown', e => {
+  if (!['ArrowRight', 'ArrowLeft'].includes(e.key)) return;
+  const tabs = [...document.querySelectorAll('.tab')], i = tabs.findIndex(t => t.dataset.tab === S.tab);
+  const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]; showTab(n.dataset.tab); n.focus();
+});
+$('search').addEventListener('input', e => { S.q = e.target.value; renderInbox(); });
+$('refresh').addEventListener('click', () => refresh(true));
+$('sAuto').addEventListener('input', onSlide);
+$('sReview').addEventListener('input', onSlide);
+['sAuto', 'sReview'].forEach(id => $(id).addEventListener('change', () => log('しきい値変更', null, `自動OK ${S.settings.autoOk}点以上／人が確認 ${S.settings.review}点以上`)));
+$('reset').addEventListener('click', () => modal({title: 'サンプルデータに戻しますか？', lead: 'お問い合わせと操作履歴がサンプル12件の状態に戻ります。ホームページから届いたデータも消えます。この操作は取り消せません。', confirm: 'サンプルに戻す', kind: 'danger', comment: false, onOk: () => {
+  rm(K.inq); rm(K.log); applySeed(false); S.sel = null; S.filter = 'all'; S.q = ''; $('search').value = ''; ingest(); renderAll(); toast('サンプルデータに戻しました');
+}}));
+window.addEventListener('storage', e => { if (e.key === null || String(e.key).startsWith('kasane.')) refresh(false); });
+renderAll();
+showTab(location.hash.slice(1) || 'dash');
+setInterval(() => { if (!document.hidden && !document.querySelector('.backdrop')) renderDash(); }, 60000);
+})();
+</script>
+</body>
+</html>
