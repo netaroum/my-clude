@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>マイテンプレ帳</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1f2328;
+    --muted: #59636e;
+    --line: #d0d7de;
+    --soft: #f6f8fa;
+    --main: #1f6feb;
+    --main-dark: #1554c0;
+    --ok: #1a7f37;
+    --sub: #eef1f4;
+    --sub-text: #424a53;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    font-size: 18px;
+    line-height: 1.8;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 8px; }
+  .lead { color: var(--muted); margin: 0 0 28px; }
+  h2.main-title {
+    font-size: 30px;
+    margin: 0 0 20px;
+    padding: 14px 18px;
+    background: #ddf4ff;
+    border-left: 8px solid var(--main);
+    border-radius: 8px;
+  }
+  .step { margin: 0 0 28px; }
+  .step-label { font-size: 22px; font-weight: bold; margin: 0 0 10px; }
+  textarea {
+    width: 100%;
+    min-height: 220px;
+    font-size: 18px;
+    line-height: 1.7;
+    padding: 14px;
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  textarea:focus { outline: none; border-color: var(--main); }
+  .scenes { display: flex; flex-wrap: wrap; gap: 10px; }
+  .scene-btn {
+    font-size: 19px;
+    padding: 12px 20px;
+    border: 2px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .scene-btn.selected {
+    background: var(--main);
+    border-color: var(--main);
+    color: #fff;
+    font-weight: bold;
+  }
+  .big-copy {
+    display: block;
+    width: 100%;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 20px;
+    border: none;
+    border-radius: 12px;
+    background: var(--main);
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 5px 0 var(--main-dark);
+    transition: transform .08s, box-shadow .08s, background .2s;
+  }
+  .big-copy:active, .big-copy.pressed { transform: translateY(5px); box-shadow: 0 0 0 var(--main-dark); }
+  .big-copy.done { background: var(--ok); box-shadow: 0 5px 0 #116329; }
+  .big-copy.done.pressed { box-shadow: 0 0 0 #116329; }
+  .note {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    background: var(--soft);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 17px;
+  }
+  .warn { color: #cf222e; font-weight: bold; min-height: 1.8em; margin: 8px 0 0; }
+  hr.split { border: none; border-top: 3px dashed var(--line); margin: 56px 0 32px; }
+  h2.ref-title { font-size: 22px; color: var(--muted); margin: 0 0 20px; }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 0 0 20px;
+  }
+  .card h3 { font-size: 20px; margin: 0 0 10px; }
+  .card pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: inherit;
+    font-size: 17px;
+    background: var(--soft);
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin: 0 0 12px;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 0 0 12px; font-size: 17px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--soft); }
+  .small-copy {
+    font-size: 15px;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--sub);
+    color: var(--sub-text);
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 3px 0 #c4cbd2;
+    transition: transform .08s, box-shadow .08s, background .2s;
+  }
+  .small-copy:active, .small-copy.pressed { transform: translateY(3px); box-shadow: 0 0 0 #c4cbd2; }
+  .small-copy.done { background: #dafbe1; color: var(--ok); border-color: #8ddb9d; }
+</style>
+</head>
+<body>
+<main>
+  <h1>マイテンプレ帳</h1>
+  <p class="lead">自分の書き方ルールと穴埋めの型で、自分らしい文をすぐ作るための道具です。</p>
+
+  <h2 class="main-title">▼ ここが本番（毎回使うのはこの3ステップ）</h2>
+
+  <section class="step">
+    <p class="step-label">① 相手のメッセージ（または今日伝えたい内容）を貼る</p>
+    <textarea id="input" placeholder="ここに貼ります。箇条書きのメモでもOK（例：取引先へ　納品の依頼　食パン5斤…）"></textarea>
+  </section>
+
+  <section class="step">
+    <p class="step-label">② 場面を1つ選ぶ</p>
+    <div class="scenes" id="scenes"></div>
+  </section>
+
+  <section class="step">
+    <p class="step-label">③ コピーして Claude Code に貼る</p>
+    <button class="big-copy" id="mainCopy" type="button">Claude Codeに投げる文章をコピー</button>
+    <p class="warn" id="warn"></p>
+    <p class="note">このページの中では完成文は出ません。<br>このボタンでコピーした文章を Claude Code に貼ると、自分の文体の完成文が返ってきます。</p>
+  </section>
+
+  <hr class="split">
+
+  <h2 class="ref-title">※こっちは参考置き場（毎回は使わない）</h2>
+
+  <div class="card">
+    <h3>共通ルール</h3>
+    <pre id="refCommon"></pre>
+    <button class="small-copy" type="button" data-copy="refCommon">コピー</button>
+  </div>
+
+  <div class="card">
+    <h3>場面ごとの条件ルール</h3>
+    <pre id="refScenes"></pre>
+    <button class="small-copy" type="button" data-copy="refScenes">コピー</button>
+  </div>
+
+  <div class="card">
+    <h3>穴埋めの型（依頼文）と穴の説明表</h3>
+    <pre id="refTemplate"></pre>
+    <table>
+      <thead><tr><th>穴</th><th>入れるもの</th></tr></thead>
+      <tbody id="holeTable"></tbody>
+    </table>
+    <button class="small-copy" type="button" data-copy="refTemplateAll">コピー</button>
+  </div>
+
+  <div class="card">
+    <h3>完成例（記入例）</h3>
+    <pre id="refExample1"></pre>
+    <button class="small-copy" type="button" data-copy="refExample1">コピー</button>
+  </div>
+
+  <div class="card">
+    <h3>完成例（記入例・納品の依頼）</h3>
+    <pre id="refExample2"></pre>
+    <button class="small-copy" type="button" data-copy="refExample2">コピー</button>
+  </div>
+</main>
+
+<script>
+  var COMMON_RULES = [
+    "書き出しは「こんばんは。」などの時間帯のあいさつと「お世話になっております。」を、1行ずつ分けて書く",
+    "1文書くごとに改行し、話のまとまりが変わる所で空行を1行入れる",
+    "本題の前に、相手がしてくれたことへの「ありがとうございます」を必ず入れる",
+    "自分の行動は「〜させていただきます」「〜させていただきたいと思います」とへりくだって言う",
+    "締めは「よろしくお願いいたします。」（続く相手には「引き続き」を付ける）。箇条書き・見出し・装飾記号は使わない"
+  ];
+
+  var SCENES = [
+    { name: "告知", rule: "感謝の行のあとに、何をいつするのかを1文で言い切る" },
+    { name: "質問への返信", rule: "「こちらこそ」で受けてから、聞かれたことに1文で答える" },
+    { name: "反論", rule: "感謝の行は残し、自分の考えは「〜と思います」で1文にとどめる" },
+    { name: "依頼", rule: "お願いしたいことを「さっそく〜させていただきたいと思います」の1文にまとめる" },
+    { name: "お礼", rule: "相手がしてくれたことの感想を1つ書き、気持ちが強い所だけ「！！」を使う" }
+  ];
+
+  var TEMPLATE = [
+    "〔A〕。",
+    "お世話になっております。",
+    "",
+    "いろいろと〔B〕ありがとうございます。",
+    "さっそく〔C〕への〔D〕させていただきたいと思います。",
+    "",
+    "よろしくお願いいたします。"
+  ].join("\n");
+
+  var HOLES = [
+    ["〔A〕", "時間帯のあいさつ（おはようございます／こんにちは／こんばんは）"],
+    ["〔B〕", "相手がしてくれたこと（例：有益な情報を共有していただき）"],
+    ["〔C〕", "お願いする対象（例：勉強会）"],
+    ["〔D〕", "お願いしたい行動（例：申し込み）"]
+  ];
+
+  var EXAMPLE1 = [
+    "こんにちは。",
+    "お世話になっております。",
+    "",
+    "いろいろと丁寧に資料をご案内いただきありがとうございます。",
+    "さっそく個別相談会への参加の申し込みをさせていただきたいと思います。",
+    "",
+    "よろしくお願いいたします。"
+  ].join("\n");
+
+  var EXAMPLE2 = [
+    "こんにちは。",
+    "お世話になっております。",
+    "",
+    "いろいろとご対応いただきありがとうございます。",
+    "さっそく〔日程〕のイベントへの納品をお願いさせていただきたいと思います。",
+    "食パン5斤、アンパン10個、クロワッサン8個をお願いいたします。",
+    "当日の朝5時にイベント会場へお届けいただきたいと思います。",
+    "",
+    "よろしくお願いいたします。"
+  ].join("\n");
+
+  function bullets(list) {
+    return list.map(function (r) { return "・" + r; }).join("\n");
+  }
+  function sceneRulesText() {
+    return SCENES.map(function (s) { return "・" + s.name + "＝" + s.rule; }).join("\n");
+  }
+  function holeText() {
+    return HOLES.map(function (h) { return h[0] + "：" + h[1]; }).join("\n");
+  }
+
+  var refTexts = {
+    refCommon: bullets(COMMON_RULES),
+    refScenes: sceneRulesText(),
+    refTemplate: TEMPLATE,
+    refTemplateAll: TEMPLATE + "\n\n【穴の説明】\n" + holeText(),
+    refExample1: EXAMPLE1,
+    refExample2: EXAMPLE2
+  };
+  ["refCommon", "refScenes", "refTemplate", "refExample1", "refExample2"].forEach(function (id) {
+    document.getElementById(id).textContent = refTexts[id];
+  });
+  var tbody = document.getElementById("holeTable");
+  HOLES.forEach(function (h) {
+    var tr = document.createElement("tr");
+    var a = document.createElement("td"); a.textContent = h[0];
+    var b = document.createElement("td"); b.textContent = h[1];
+    tr.appendChild(a); tr.appendChild(b); tbody.appendChild(tr);
+  });
+
+  var selected = null;
+  var scenesBox = document.getElementById("scenes");
+  SCENES.forEach(function (s, i) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "scene-btn";
+    btn.textContent = s.name;
+    btn.addEventListener("click", function () {
+      selected = i;
+      Array.prototype.forEach.call(scenesBox.children, function (c) { c.classList.remove("selected"); });
+      btn.classList.add("selected");
+      document.getElementById("warn").textContent = "";
+    });
+    scenesBox.appendChild(btn);
+  });
+
+  function buildRequest() {
+    var s = SCENES[selected];
+    var input = document.getElementById("input").value.trim();
+    return [
+      "次の材料から、私の文体で「" + s.name + "」の文を1通作ってください。",
+      "10行以内で、そのまま送れる形にしてください。相手の実名・連絡先は、あなたの説明の中には書き出さないでください。",
+      "",
+      "▼ 私の共通ルール",
+      bullets(COMMON_RULES),
+      "",
+      "▼ この場面（" + s.name + "）で上乗せするルール",
+      "・" + s.rule,
+      "",
+      "▼ 穴埋めの型（言い回しはこのまま、穴だけ埋める。必要な時だけ行を足す）",
+      TEMPLATE,
+      "",
+      "▼ 穴の説明",
+      holeText(),
+      "",
+      "▼ 材料（相手のメッセージ、または今日伝えたい内容）",
+      input,
+      "",
+      "完成文のあとに、どのルールと穴がどう働いたかを2〜3行で添えてください。"
+    ].join("\n");
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).catch(function () { return fallbackCopy(text); });
+    }
+    return fallbackCopy(text);
+  }
+  function fallbackCopy(text) {
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.top = "-1000px";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error("copy failed"));
+    });
+  }
+
+  function showCopied(btn, label) {
+    var original = btn.dataset.label || btn.textContent;
+    btn.dataset.label = original;
+    btn.classList.add("pressed");
+    setTimeout(function () { btn.classList.remove("pressed"); }, 150);
+    btn.classList.add("done");
+    btn.textContent = label;
+    clearTimeout(btn._timer);
+    btn._timer = setTimeout(function () {
+      btn.classList.remove("done");
+      btn.textContent = original;
+    }, 2000);
+  }
+
+  document.getElementById("mainCopy").addEventListener("click", function () {
+    var btn = this;
+    var warn = document.getElementById("warn");
+    if (!document.getElementById("input").value.trim()) {
+      warn.textContent = "① の入力欄に、相手のメッセージか伝えたい内容を貼ってください。";
+      return;
+    }
+    if (selected === null) {
+      warn.textContent = "② の場面ボタンを1つ選んでください。";
+      return;
+    }
+    warn.textContent = "";
+    copyText(buildRequest()).then(function () {
+      showCopied(btn, "✅ コピーしました！Claude Codeに貼ってください");
+    }, function () {
+      warn.textContent = "コピーできませんでした。もう一度押してください。";
+    });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".small-copy"), function (btn) {
+    btn.addEventListener("click", function () {
+      copyText(refTexts[btn.getAttribute("data-copy")]).then(function () {
+        showCopied(btn, "✅ コピーしました！");
+      });
+    });
+  });
+</script>
+</body>
+</html>
